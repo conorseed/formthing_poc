@@ -1,0 +1,22 @@
+{
+  "canisters": {
+    "form_thing_backend":{
+      "dependencies": [
+        "vetkd_system_api"
+      ],
+      "main": "src/form_thing_backend/main.mo",
+      "type": "motoko"
+    },
+    "vetkd_system_api": {
+      "candid": "vetkd_system_api.did",
+      "type": "custom",
+      "wasm": "vetkd_system_api.wasm"
+    },
+    "internet_identity": {
+      "candid": "internet_identity.did",
+      "type": "custom",
+      "wasm": "internet_identity.wasm"
+    }
+  },
+  "version": 1
+}
