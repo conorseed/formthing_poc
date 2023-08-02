@@ -1,2 +1,4 @@
 dist
 .DS_Store
+.dfx/
+node_modules/

@@ -1,0 +1,6 @@
+{
+  "devDependencies": {
+    "prettier": "^3.0.0",
+    "prettier-plugin-motoko": "^0.7.1"
+  }
+}
