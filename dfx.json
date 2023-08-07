@@ -8,14 +8,14 @@
       "type": "motoko"
     },
     "vetkd_system_api": {
-      "candid": "vetkd_system_api.did",
+      "candid": "src/vetkd/vetkd_system_api.did",
       "type": "custom",
-      "wasm": "vetkd_system_api.wasm"
+      "wasm": "src/vetkd/vetkd_system_api.wasm"
     },
     "internet_identity": {
-      "candid": "internet_identity.did",
+      "candid": "src/internet_identity/internet_identity.did",
       "type": "custom",
-      "wasm": "internet_identity.wasm"
+      "wasm": "src/internet_identity/internet_identity.wasm"
     }
   },
   "version": 1
