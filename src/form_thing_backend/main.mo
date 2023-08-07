@@ -162,50 +162,32 @@ shared ({ caller = creator }) actor class FormThingActor() {
   /*
    * VETKD Functionality
    */
-  // Only the ecdsa methods in the IC management canister is required here.
-  type VETKD_SYSTEM_API = actor {
-    vetkd_public_key : ({
-      canister_id : ?Principal;
-      derivation_path : [Blob];
-      key_id : { curve : { #bls12_381 }; name : Text };
-    }) -> async ({ public_key : Blob });
-    vetkd_encrypted_key : ({
-      public_key_derivation_path : [Blob];
-      derivation_id : Blob;
-      key_id : { curve : { #bls12_381 }; name : Text };
-      encryption_public_key : Blob;
-    }) -> async ({ encrypted_key : Blob });
-  };
-
-  let vetkd_system_api : VETKD_SYSTEM_API = actor ("s55qq-oqaaa-aaaaa-aaakq-cai");
-
-  public shared ({ caller }) func app_vetkd_public_key(derivation_path : [Blob]) : async Text {
-    let { public_key } = await vetkd_system_api.vetkd_public_key({
+  public shared ({ caller }) func vetkd_get_public_key(derivation_path : [Blob]) : async Text {
+    let { public_key } = await FormThing.vetkd_api.vetkd_public_key({
       canister_id = null;
       derivation_path;
       key_id = { curve = #bls12_381; name = "test_key_1" };
     });
-    Hex.encode(Blob.toArray(public_key));
+    return Hex.encode(Blob.toArray(public_key));
   };
 
-  public shared ({ caller }) func symmetric_key_verification_key() : async Text {
-    let { public_key } = await vetkd_system_api.vetkd_public_key({
-      canister_id = null;
-      derivation_path = Array.make(Text.encodeUtf8("symmetric_key"));
-      key_id = { curve = #bls12_381; name = "test_key_1" };
-    });
-    Hex.encode(Blob.toArray(public_key));
-  };
+  public shared ({ caller }) func vetkd_get_symmetric_key(derivation_id : Blob, encryption_public_key : Blob) : async Text {
+    // TO DO:
+    // - Check caller has privilege to access this key (is this needed?)
+    //   - Anon can only access "data" key on form
+    //   - User can access both "data" and "admin" keys on form
+    // - Check if valid derivation_id
 
-  public shared ({ caller }) func encrypted_symmetric_key_for_caller(encryption_public_key : Blob) : async Text {
-    let caller_blob = Principal.toBlob(caller);
-    let { encrypted_key } = await vetkd_system_api.vetkd_encrypted_key({
-      derivation_id = Principal.toBlob(caller);
+    let { encrypted_key } = await FormThing.vetkd_api.vetkd_encrypted_key({
+      derivation_id;
       public_key_derivation_path = Array.make(Text.encodeUtf8("symmetric_key"));
       key_id = { curve = #bls12_381; name = "test_key_1" };
       encryption_public_key;
     });
-    Hex.encode(Blob.toArray(encrypted_key));
+    return Hex.encode(Blob.toArray(encrypted_key));
   };
 
 };
+
+// https://github.com/dfinity/examples/blob/master/motoko/encrypted-notes-dapp-vetkd/src/encrypted_notes_motoko/
+// https://github.com/dfinity/motoko-base/blob/1bee37dbe5dbab1017b18ba0490b78f148196c8b/src/Array.mo
