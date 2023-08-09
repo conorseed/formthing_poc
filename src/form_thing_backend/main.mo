@@ -162,10 +162,10 @@ shared ({ caller = creator }) actor class FormThingActor() {
   /*
    * VETKD Functionality
    */
-  public shared ({ caller }) func vetkd_get_public_key(derivation_path : [Blob]) : async Text {
+  public shared ({ caller }) func vetkd_get_public_key() : async Text {
     let { public_key } = await FormThing.vetkd_api.vetkd_public_key({
       canister_id = null;
-      derivation_path;
+      derivation_path = Array.make(Text.encodeUtf8("symmetric_key"));
       key_id = { curve = #bls12_381; name = "test_key_1" };
     });
     return Hex.encode(Blob.toArray(public_key));

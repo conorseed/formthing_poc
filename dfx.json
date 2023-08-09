@@ -1,9 +1,7 @@
 {
   "canisters": {
-    "form_thing_backend":{
-      "dependencies": [
-        "vetkd_system_api"
-      ],
+    "form_thing_backend": {
+      "dependencies": ["vetkd_system_api"],
       "main": "src/form_thing_backend/main.mo",
       "type": "motoko"
     },
@@ -18,5 +16,6 @@
       "wasm": "src/internet_identity/internet_identity.wasm"
     }
   },
+  "output_env_file": "src/form_thing_frontend/.env",
   "version": 1
 }

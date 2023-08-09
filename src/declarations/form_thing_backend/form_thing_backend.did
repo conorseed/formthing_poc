@@ -1,0 +1,23 @@
+type Result = 
+ variant {
+   err: text;
+   ok: FormReturn;
+ };
+type FormThingActor = 
+ service {
+   create_form: (text, text) -> (text);
+   create_organisation: (text) -> (text);
+   get_form_by_id: (text) -> (Result);
+   vetkd_get_public_key: () -> (text);
+   vetkd_get_symmetric_key: (blob, blob) -> (text);
+ };
+type FormReturn = 
+ record {
+   created: int;
+   id: text;
+   name: text;
+   organisation_id: text;
+   updated: int;
+   users: vec principal;
+ };
+service : () -> FormThingActor
