@@ -7,6 +7,8 @@ import Principal "mo:base/Principal";
 import Text "mo:base/Text";
 
 import Map "vendor/map/Map";
+// import Source "vendor/uuid/async/SourceV4";
+// import UUID "vendor/uuid/UUID";
 
 module FormThingHelpers {
 
@@ -21,23 +23,36 @@ module FormThingHelpers {
     users : Buffer.Buffer<Principal>; // buffer of users with access to the organisation
   };
 
-  public type Form = {
+  public type FormBase = {
     id : Text; // id of the form
     created : Int; // timestamp from Time.now() of when created
     updated : Int; // timestamp from Time.now() of when updated
     name : Text; // name of the form
     organisation_id : Text; // id of organisation the form belongs to
+  };
+
+  public type Form = FormBase and {
     users : Buffer.Buffer<Principal>; // buffer of users with access to the form
   };
 
-  public type FormReturn = {
-    id : Text; // id of the form
-    created : Int; // timestamp from Time.now() of when created
-    updated : Int; // timestamp from Time.now() of when updated
-    name : Text; // name of the form
-    organisation_id : Text; // id of organisation the form belongs to
+  public type FormReturn = FormBase and {
     users : [Principal]; // array of users with access to the form
   };
+
+  public type FormWithNonce = FormReturn and {
+    nonce : Text; // nonce
+  };
+
+  public type Nonce = {
+    nonce : Text; // nonce
+  };
+
+  public type NonceCheck = {
+    form_id : Text; // id of the form the nonce belongs to
+    lock : Bool; // lock
+  };
+
+  public type FormReturnWithNonce = FormReturn and Nonce;
 
   public type Entry = {
     created : Int; // timestamp from Time.now() of when created
@@ -45,8 +60,16 @@ module FormThingHelpers {
     data : Text; // encrypted entry data
   };
 
+  public type Entries = {
+    entries : Buffer.Buffer<Entry>; // buffer of entries
+  };
+
+  public type EntriesReturn = {
+    entries : [Entry]; // array of entries
+  };
+
   /*
-   * FUNCTIONS
+   * HELPER FUNCTIONS
    */
 
   // Returns a substring of the given text from the given start index to the given end index
@@ -71,6 +94,13 @@ module FormThingHelpers {
     };
 
     result;
+  };
+
+  // creates a unique nonce
+  public func create_nonce() : Text {
+    // let g = Source.Source();
+    // return UUID.toText(await g.new());
+    return "Hello123";
   };
 
   /*

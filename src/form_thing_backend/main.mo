@@ -14,31 +14,35 @@ import Map "vendor/map/Map";
 
 shared ({ caller = creator }) actor class FormThingActor() {
 
-  /*
+  /**
    * Global Vars
    */
   let { thash; nhash } = Map;
 
   // FORMS INFORMATION
-  // - Hashed by "Organisation ID + Form ID"
-  var forms = Map.new<Text, FormThing.Form>(thash);
+  // - Hashed by "Form ID"
+  var stable_forms = Map.new<Text, FormThing.Form>(thash);
 
   // FORM ENTRIES
-  // - Hashed by "Organisation ID + Form ID"
-  var entries = Map.new<Text, FormThing.Entry>(thash);
+  // - Hashed by "Form ID"
+  var stable_entries = Map.new<Text, FormThing.Entries>(thash);
+
+  // NONCES
+  // - Hashed by "Nonce", value is "Form ID"
+  var stable_nonces = Map.new<Text, FormThing.NonceCheck>(thash);
 
   // ORGANISATIONS
   // - Hashed by "Organisation ID"
-  var organisations = Map.new<Text, FormThing.Organisation>(thash);
+  var stable_organisations = Map.new<Text, FormThing.Organisation>(thash);
 
-  /*
+  /**
    * Forms Functionality
    */
 
   var current_form_id : Nat = 0;
 
   // - Create Form
-  public shared ({ caller }) func create_form(name : Text, organisation_id : Text) : async Text {
+  public shared ({ caller }) func create_form(name : Text, organisation_id : Text) : async Result.Result<Text, Text> {
 
     // Create Form ID
     let short_caller_id = FormThing.sub_text(Principal.toText(caller), 0, 8);
@@ -56,26 +60,26 @@ shared ({ caller = creator }) actor class FormThingActor() {
       created = time_now;
       updated = time_now;
       id = form_id;
-      name = name;
-      organisation_id = organisation_id;
-      users = users;
+      name;
+      organisation_id;
+      users;
     };
 
     // add form to forms
-    ignore Map.put(forms, thash, form_id, new_form);
+    ignore Map.put(stable_forms, thash, form_id, new_form);
 
     // increment current_form_id
     current_form_id += 1;
 
     // return id
-    return form_id;
+    return #ok(form_id);
   };
 
   // - Get Form by ID
   public shared ({ caller }) func get_form_by_id(form_id : Text) : async Result.Result<FormThing.FormReturn, Text> {
 
     // find form
-    let form = Map.find<Text, FormThing.Form>(forms, func(k, v) { k == form_id });
+    let form = Map.find<Text, FormThing.Form>(stable_forms, func(k, v) { k == form_id });
 
     switch (form) {
 
@@ -97,7 +101,54 @@ shared ({ caller = creator }) actor class FormThingActor() {
           organisation_id = found_form.organisation_id;
           created = found_form.created;
           updated = found_form.updated;
-          users = users;
+          users;
+        };
+
+        #ok(form_return);
+      };
+    };
+
+  };
+
+  // - Get Form by ID with nonce
+  public func get_form_by_id_with_nonce(form_id : Text) : async Result.Result<FormThing.FormWithNonce, Text> {
+
+    // find form
+    let form = Map.find<Text, FormThing.Form>(stable_forms, func(k, v) { k == form_id });
+
+    switch (form) {
+
+      // return null if no form found
+      case null {
+        #err("Form not found");
+      };
+
+      // return form if found
+      case (?(key, found_form)) {
+
+        // convert users buffer to array
+        let users = Buffer.toArray<Principal>(found_form.users);
+
+        // create a nonce and save it
+        let nonce = FormThing.create_nonce();
+
+        let nonce_check : FormThing.NonceCheck = {
+          form_id = found_form.id;
+          lock = false;
+        };
+
+        // save nonce
+        ignore Map.put(stable_nonces, thash, nonce, nonce_check);
+
+        // create return form
+        let form_return : FormThing.FormWithNonce = {
+          id = found_form.id;
+          name = found_form.name;
+          organisation_id = found_form.organisation_id;
+          created = found_form.created;
+          updated = found_form.updated;
+          users;
+          nonce;
         };
 
         #ok(form_return);
@@ -111,44 +162,44 @@ shared ({ caller = creator }) actor class FormThingActor() {
   // - Update Form Name
   // - Delete Form
 
-  /*
+  /**
    * Organisations Functionality
    */
 
-  var current_organisation_id : Nat = 0;
+  // var current_organisation_id : Nat = 0;
 
-  // - Create Organisation
-  public shared ({ caller }) func create_organisation(name : Text) : async Text {
+  // // - Create Organisation
+  // public shared ({ caller }) func create_organisation(name : Text) : async Text {
 
-    // Create Organisation ID
-    let short_caller_id = FormThing.sub_text(Principal.toText(caller), 0, 8);
-    let organisation_id = Text.concat(Nat.toText(current_organisation_id), short_caller_id);
+  //   // Create Organisation ID
+  //   let short_caller_id = FormThing.sub_text(Principal.toText(caller), 0, 8);
+  //   let organisation_id = Text.concat(Nat.toText(current_organisation_id), short_caller_id);
 
-    // Get time now
-    let time_now = Time.now();
+  //   // Get time now
+  //   let time_now = Time.now();
 
-    // Create users buffer and add caller as user
-    let users = Buffer.Buffer<Principal>(0);
-    users.add(caller);
+  //   // Create users buffer and add caller as user
+  //   let users = Buffer.Buffer<Principal>(0);
+  //   users.add(caller);
 
-    // Create Organisation
-    let new_organisation : FormThing.Organisation = {
-      created = time_now;
-      updated = time_now;
-      id = organisation_id;
-      name = name;
-      users = users;
-    };
+  //   // Create Organisation
+  //   let new_organisation : FormThing.Organisation = {
+  //     created = time_now;
+  //     updated = time_now;
+  //     id = organisation_id;
+  //     name = name;
+  //     users = users;
+  //   };
 
-    // add organisation to organisations
-    ignore Map.put(organisations, thash, organisation_id, new_organisation);
+  //   // add organisation to organisations
+  //   ignore Map.put(organisations, thash, organisation_id, new_organisation);
 
-    // increment current_organisation_id
-    current_organisation_id += 1;
+  //   // increment current_organisation_id
+  //   current_organisation_id += 1;
 
-    // return id
-    return organisation_id;
-  };
+  //   // return id
+  //   return organisation_id;
+  // };
 
   // TO DO:
   // - Get Organisation by ID
@@ -159,7 +210,99 @@ shared ({ caller = creator }) actor class FormThingActor() {
   // - Update Organisation Name
   // - Delete Organisation
 
-  /*
+  /**
+   * Entries Functionality
+   */
+
+  // - Create Entry
+  public func create_entry(form_id : Text, data : Text, nonce : Text) : async Result.Result<Text, Text> {
+
+    // find form
+    let form = Map.find<Text, FormThing.Form>(stable_forms, func(k, v) { k == form_id });
+
+    // return early if form not found
+    switch (form) {
+      case null {
+        return #err("Form not found");
+      };
+      case (?(key, found_form)) {};
+    };
+
+    // check nonce
+    let nonce_check = Map.find<Text, FormThing.NonceCheck>(stable_nonces, func(k, v) { k == nonce });
+
+    switch (nonce_check) {
+      // return early if nonce not found
+      case null {
+        return #err("Invalid nonce");
+      };
+      case (?(key, nonce_check)) {
+        // return early if nonce does not match form id
+        if (nonce_check.form_id != form_id) {
+          return #err("Nonce does not match form id");
+        };
+
+        // return early if nonce is locked
+        if (nonce_check.lock) {
+          return #err("Nonce is already in use");
+        };
+
+        // lock nonce to ensure it can only be used once
+        let new_nonce_check : FormThing.NonceCheck = {
+          form_id = nonce_check.form_id;
+          lock = true;
+        };
+        ignore Map.put(stable_nonces, thash, nonce, new_nonce_check);
+      };
+    };
+
+    // Get time now
+    let created = Time.now();
+
+    // Create Entry
+    let new_entry : FormThing.Entry = {
+      created;
+      form_id;
+      data;
+    };
+
+    // get entries for form
+    let found_entries = Map.find<Text, FormThing.Entries>(stable_entries, func(k, v) { k == form_id });
+
+    switch (found_entries) {
+
+      // create entries if not found
+      // add new entry to entries
+      case null {
+        let entries_buffer = Buffer.Buffer<FormThing.Entry>(0);
+        entries_buffer.add(new_entry);
+
+        let new_entries : FormThing.Entries = {
+          entries = entries_buffer;
+        };
+        ignore Map.put(stable_entries, thash, form_id, new_entries);
+      };
+
+      // add entry to entries if found
+      case (?(key, found_entries)) {
+        found_entries.entries.add(new_entry);
+        ignore Map.put(stable_entries, thash, form_id, found_entries);
+      };
+    };
+
+    // delete nonce
+    switch (nonce_check) {
+      case null {};
+      case (?(key, nonce_check)) {
+        ignore Map.remove(stable_nonces, thash, nonce);
+      };
+    };
+
+    // return id
+    return #ok("Entry created");
+  };
+
+  /**
    * VETKD Functionality
    */
   public shared ({ caller }) func vetkd_get_public_key() : async Text {
