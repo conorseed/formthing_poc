@@ -3,6 +3,7 @@ import { defineConfig } from 'vite'
 import EnvironmentPlugin from 'vite-plugin-environment'
 import wasm from 'vite-plugin-wasm'
 import vue from '@vitejs/plugin-vue'
+import Components from 'unplugin-vue-components/vite'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -11,7 +12,8 @@ export default defineConfig({
     EnvironmentPlugin('all', { prefix: 'DFX_' }),
     EnvironmentPlugin({ BACKEND_CANISTER_ID: '' }),
     wasm(),
-    vue()
+    vue(),
+    Components()
   ],
   resolve: {
     alias: {

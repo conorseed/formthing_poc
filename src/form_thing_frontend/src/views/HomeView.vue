@@ -1,8 +1,10 @@
 <template>
-  <main>
+  <main class="mx-auto max-w-7xl p-6 lg:px-8">
     <section v-if="form && 'ok' in form">
-      <h2>{{ form.ok.name }}</h2>
-      <form @submit="encrypt_and_send">
+      <h2 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-4xl mb-6">
+        {{ form.ok.name }}
+      </h2>
+      <form @submit="encrypt_and_send" class="flex gap-y-4 flex-col mb-9">
         <div>
           <label for="name" class="block text-sm font-medium leading-6 text-gray-900">Name</label>
           <div class="mt-2">
@@ -35,29 +37,39 @@
             We'll only use this for spam.
           </p>
         </div>
-        <button
-          type="submit"
-          class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-        >
-          Submit
-        </button>
+        <div>
+          <button
+            type="submit"
+            class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          >
+            Submit
+          </button>
+        </div>
       </form>
     </section>
     <section v-else>
       <h2>Form not found</h2>
     </section>
     <section>
-      <h2>Entries</h2>
-      <div v-for="(entry, i) in entries" :key="entry.created.toString()">
-        <div>ID: {{ i }}</div>
-        <div>Created: {{ formatDate(entry.created) }}</div>
-        <div v-if="typeof entry.data === 'object'">
-          <div v-for="(value, key) in entry.data" :key="key">
-            <div>{{ key }}: {{ value }}</div>
+      <h2 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-4xl mb-6">Entries</h2>
+      <ul role="list" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <li
+          v-for="(entry, i) in entries"
+          :key="entry.created.toString()"
+          class="col-span-1 divide-y divide-gray-200 rounded-lg bg-white shadow p-6"
+        >
+          <div class="flex justify-between gap-x-4 py-3 text-sm text-gray-500">
+            <span>#{{ i }}</span>
+            <span>Created: {{ formatDate(entry.created) }}</span>
           </div>
-        </div>
-        <div v-else>Entry could not be decrypted</div>
-      </div>
+          <div v-if="typeof entry.data === 'object'" class="pt-4">
+            <div v-for="(value, key) in entry.data" :key="key">
+              <div>{{ key }}: {{ value }}</div>
+            </div>
+          </div>
+          <div v-else>Entry could not be decrypted</div>
+        </li>
+      </ul>
       <div v-if="!entries || !entries.length">No entries yet.</div>
     </section>
   </main>
