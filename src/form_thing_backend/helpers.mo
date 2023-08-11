@@ -60,13 +60,9 @@ module FormThingHelpers {
     data : Text; // encrypted entry data
   };
 
-  public type Entries = {
-    entries : Buffer.Buffer<Entry>; // buffer of entries
-  };
+  public type Entries = Buffer.Buffer<Entry>; // buffer of entries
 
-  public type EntriesReturn = {
-    entries : [Entry]; // array of entries
-  };
+  public type EntriesReturn = [Entry]; // array of entries
 
   /*
    * HELPER FUNCTIONS

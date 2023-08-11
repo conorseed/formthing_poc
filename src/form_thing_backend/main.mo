@@ -277,15 +277,14 @@ shared ({ caller = creator }) actor class FormThingActor() {
         let entries_buffer = Buffer.Buffer<FormThing.Entry>(0);
         entries_buffer.add(new_entry);
 
-        let new_entries : FormThing.Entries = {
-          entries = entries_buffer;
-        };
+        let new_entries : FormThing.Entries = entries_buffer;
+
         ignore Map.put(stable_entries, thash, form_id, new_entries);
       };
 
       // add entry to entries if found
       case (?(key, found_entries)) {
-        found_entries.entries.add(new_entry);
+        found_entries.add(new_entry);
         ignore Map.put(stable_entries, thash, form_id, found_entries);
       };
     };
@@ -300,6 +299,37 @@ shared ({ caller = creator }) actor class FormThingActor() {
 
     // return id
     return #ok("Entry created");
+  };
+
+  // - Get entries for form
+  public func get_entries(form_id : Text) : async Result.Result<FormThing.EntriesReturn, Text> {
+
+    // find form
+    let form = Map.find<Text, FormThing.Form>(stable_forms, func(k, v) { k == form_id });
+
+    // return early if form not found
+    switch (form) {
+      case null {
+        return #err("Form does not exist");
+      };
+      case (?(key, found_form)) {};
+    };
+
+    // get entries for form
+    let found_entries = Map.find<Text, FormThing.Entries>(stable_entries, func(k, v) { k == form_id });
+
+    switch (found_entries) {
+
+      // return early if entries not found
+      case null {
+        return #err("No entries found");
+      };
+
+      // return entries if found
+      case (?(key, found_entries)) {
+        return #ok(Buffer.toArray<FormThing.Entry>(found_entries));
+      };
+    };
   };
 
   /**
