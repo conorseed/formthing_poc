@@ -2,6 +2,7 @@ dist
 .DS_Store
 .dfx/
 node_modules/
+src/declarations/
 
 # Logs
 logs
