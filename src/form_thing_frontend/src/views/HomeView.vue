@@ -46,6 +46,20 @@
     <section v-else>
       <h2>Form not found</h2>
     </section>
+    <section>
+      <h2>Entries</h2>
+      <div v-for="(entry, i) in entries" :key="entry.created.toString()">
+        <div>ID: {{ i }}</div>
+        <div>Created: {{ formatDate(entry.created) }}</div>
+        <div v-if="typeof entry.data === 'object'">
+          <div v-for="(value, key) in entry.data" :key="key">
+            <div>{{ key }}: {{ value }}</div>
+          </div>
+        </div>
+        <div v-else>Entry could not be decrypted</div>
+      </div>
+      <div v-if="!entries || !entries.length">No entries yet.</div>
+    </section>
   </main>
 </template>
 
@@ -54,14 +68,18 @@ import * as agent from '@dfinity/agent'
 import * as vetkd from 'ic-vetkd-utils'
 import { form_thing_backend } from '@root/declarations/form_thing_backend'
 import { ref, computed, watch } from 'vue'
-import type { Result } from '@root/declarations/form_thing_backend/form_thing_backend.did'
+import type {
+  Result,
+  Result_1,
+  EntriesReturn
+} from '@root/declarations/form_thing_backend/form_thing_backend.did'
 
 // Get Form ID
 const form_id = ref('02vxsx-fa')
 
 // Get Form
 const form = ref<Result>()
-const form_res: Result = await form_thing_backend.get_form_by_id(form_id.value)
+const form_res = await form_thing_backend.get_form_by_id_with_nonce(form_id.value)
 form.value = form_res
 console.log('form', form.value)
 
@@ -69,6 +87,13 @@ console.log('form', form.value)
 const form_key = ref<Uint8Array>()
 if ('ok' in form.value) {
   form_key.value = await get_vetkey_by_derivation_id(hex_decode(form_id.value))
+  get_entries()
+}
+
+// else create the form and refresh the page
+else {
+  await form_thing_backend.create_form('Awesome New Form', '')
+  window.location.reload()
 }
 
 // setup form data
@@ -81,12 +106,65 @@ const form_data = ref({
 const encrypted_form_data = ref<string>('')
 const encrypt_and_send = async (e: Event) => {
   e.preventDefault()
-  if (form.value == null || form_key.value == null) return
+  // return early if form is not ready
+  if (form.value == null || form_key.value == null || 'err' in form.value) return
+
+  // encrypt form data
   console.log('encrypting form_data', form_data.value)
   const encrypted_data = await aes_gcm_encrypt(JSON.stringify(form_data.value), form_key.value)
   encrypted_form_data.value = encrypted_data
   console.log('encrypted_form_data', encrypted_form_data.value)
-  // const res = await form_thing_backend.submit_form_data(form_id.value, encrypted_data)
+
+  // send encrypted data to backend
+  const res = await form_thing_backend.create_entry(
+    form_id.value,
+    encrypted_data,
+    form.value.ok.nonce
+  )
+  console.log('create_entry', res)
+
+  // refresh entries
+  get_entries()
+}
+
+// get entries
+interface EntryDecrypted {
+  created: bigint
+  data: {
+    [key: string]: any
+  }
+  form_id: string
+}
+type EntriesDecrypted = Array<EntryDecrypted>
+
+const entries = ref<EntriesDecrypted | EntriesReturn>()
+async function get_entries() {
+  const res = await form_thing_backend.get_entries(form_id.value)
+  // return early if error
+  if ('err' in res) {
+    console.warn('get_entries', res.err)
+    return
+  }
+
+  // decrypt entries
+  const decrypted_entries = await Promise.all(
+    res.ok.map(async (entry) => {
+      // return early if form is not ready
+      if (form_key.value == null) {
+        return {
+          ...entry
+        }
+      }
+      const decrypted_data = await aes_gcm_decrypt(entry.data, form_key.value)
+      return {
+        form_id: entry.form_id,
+        data: JSON.parse(decrypted_data),
+        created: entry.created
+      }
+    })
+  )
+  entries.value = decrypted_entries
+  console.log('entries retrieved', entries.value)
 }
 
 // decrypt form data
@@ -98,6 +176,7 @@ watch(encrypted_form_data, async (encrypted_data) => {
   decrypted_form_data.value = JSON.parse(decrypted_data)
   console.log('decrypted_data', decrypted_form_data.value)
 })
+
 /**
  * Helpers
  */
@@ -160,5 +239,13 @@ async function aes_gcm_decrypt(ciphertext_hex: string, rawKey: Uint8Array) {
     ciphertext
   )
   return new TextDecoder().decode(decrypted)
+}
+
+function formatDate(nanoseconds: bigint) {
+  let date = new Date(parseInt(nanoseconds.toString()) / 1000000)
+  return new Intl.DateTimeFormat('en-US', {
+    dateStyle: 'short',
+    timeStyle: 'short'
+  }).format(date)
 }
 </script>
