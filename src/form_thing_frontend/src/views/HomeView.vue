@@ -96,10 +96,19 @@ form.value = form_res
 console.log('form', form.value)
 
 // if form exists, get the verified encrypted key
-const form_key = ref<Uint8Array>()
+const form_key_public = ref<Uint8Array>()
+const form_key_derived = ref<Uint8Array>()
 if ('ok' in form.value) {
-  form_key.value = await get_vetkey_by_derivation_id(hex_decode(form_id.value))
-  get_entries()
+  get_vetkey_public().then((pk) => {
+    console.log('public key retrieved:', pk)
+    form_key_public.value = pk
+    if (!form.value || !('ok' in form.value)) return
+    get_vetkey_by_derivation_id(hex_decode(form.value.ok.id)).then((key) => {
+      console.log('derived key retrieved:', key)
+      form_key_derived.value = key
+      get_entries()
+    })
+  })
 }
 
 // else create the form and refresh the page
@@ -119,11 +128,15 @@ const encrypted_form_data = ref<string>('')
 const encrypt_and_send = async (e: Event) => {
   e.preventDefault()
   // return early if form is not ready
-  if (form.value == null || form_key.value == null || 'err' in form.value) return
+  if (form.value == null || form_key_public.value == null || 'err' in form.value) return
 
   // encrypt form data
   console.log('encrypting form_data', form_data.value)
-  const encrypted_data = await aes_gcm_encrypt(JSON.stringify(form_data.value), form_key.value)
+  const encrypted_data = await aes_encrypt(JSON.stringify(form_data.value), form_key_public.value)
+  if (encrypted_data == null) {
+    console.warn('encrypted_data is null')
+    return
+  }
   encrypted_form_data.value = encrypted_data
   console.log('encrypted_form_data', encrypted_form_data.value)
 
@@ -162,12 +175,14 @@ async function get_entries() {
   const decrypted_entries = await Promise.all(
     res.ok.map(async (entry) => {
       // return early if form is not ready
-      if (form_key.value == null) {
+      if (form_key_derived.value == null) {
         return {
           ...entry
         }
       }
-      const decrypted_data = await aes_gcm_decrypt(entry.data, form_key.value)
+      console.log('decrypting entry', entry)
+      const decrypted_data = await aes_decrypt(entry.data, form_key_derived.value)
+      console.log('decrypted_data', decrypted_data)
       return {
         form_id: entry.form_id,
         data: JSON.parse(decrypted_data),
@@ -182,9 +197,10 @@ async function get_entries() {
 // decrypt form data
 const decrypted_form_data = ref()
 watch(encrypted_form_data, async (encrypted_data) => {
-  if (form_key.value == null) return
+  if (form_key_derived.value == null) return
   console.log('decrypting')
-  const decrypted_data = await aes_gcm_decrypt(encrypted_data, form_key.value)
+  const decrypted_data = await aes_decrypt(encrypted_data, form_key_derived.value)
+  console.log('decrypted', decrypted_data)
   decrypted_form_data.value = JSON.parse(decrypted_data)
   console.log('decrypted_data', decrypted_form_data.value)
 })
@@ -205,52 +221,56 @@ function hex_encode(bytes: Uint8Array) {
 }
 // Get the verified encrypted key for form_id
 async function get_vetkey_by_derivation_id(derivation_id: Uint8Array) {
+  // setup transport keys
   const seed = window.crypto.getRandomValues(new Uint8Array(32))
   const tsk = new vetkd.TransportSecretKey(seed)
-  const ek_bytes_hex = await form_thing_backend.vetkd_get_symmetric_key(
+
+  // request derived key
+  const ek_bytes_hex = await form_thing_backend.vetkd_get_decryption_key(
     derivation_id,
     tsk.public_key()
   )
+  // return early if no public key
+  if (form_key_public.value == null) return
+  console.log('tsk', tsk)
+  // verify the key
+  const k_bytes = tsk.decrypt(hex_decode(ek_bytes_hex), form_key_public.value, derivation_id)
+  return k_bytes
+}
+
+// Get the public vetkey
+async function get_vetkey_public() {
   const pk_bytes_hex = await form_thing_backend.vetkd_get_public_key()
-  const the_key = await tsk.decrypt_and_hash(
-    hex_decode(ek_bytes_hex),
-    hex_decode(pk_bytes_hex),
-    derivation_id,
-    32,
-    new TextEncoder().encode('aes-256-gcm')
-  )
-  return the_key
+  return hex_decode(pk_bytes_hex)
 }
 
 // Encrypt a string with AES-GCM
-async function aes_gcm_encrypt(message: string, rawKey: Uint8Array) {
-  const iv = window.crypto.getRandomValues(new Uint8Array(12)) // 96-bits; unique per message
-  const aes_key = await window.crypto.subtle.importKey('raw', rawKey, 'AES-GCM', false, ['encrypt'])
+async function aes_encrypt(message: string, rawKey: Uint8Array) {
   const message_encoded = new TextEncoder().encode(message)
-  const ciphertext_buffer = await window.crypto.subtle.encrypt(
-    { name: 'AES-GCM', iv: iv },
-    aes_key,
-    message_encoded
+  const seed = window.crypto.getRandomValues(new Uint8Array(32))
+
+  // return early if form is not ready
+  if (!form.value || !('ok' in form.value)) return
+  // return early if form_key_public is not ready
+  if (!form_key_public.value) return
+
+  const ciphertext = vetkd.IBECiphertext.encrypt(
+    form_key_public.value,
+    hex_decode(form.value.ok.id),
+    message_encoded,
+    seed
   )
-  const ciphertext = new Uint8Array(ciphertext_buffer)
-  var iv_and_ciphertext = new Uint8Array(iv.length + ciphertext.length)
-  iv_and_ciphertext.set(iv, 0)
-  iv_and_ciphertext.set(ciphertext, iv.length)
-  return hex_encode(iv_and_ciphertext)
+  return hex_encode(ciphertext.serialize())
 }
 
 // Decrypt a string with AES-GCM
-async function aes_gcm_decrypt(ciphertext_hex: string, rawKey: Uint8Array) {
-  const iv_and_ciphertext = hex_decode(ciphertext_hex)
-  const iv = iv_and_ciphertext.subarray(0, 12) // 96-bits; unique per message
-  const ciphertext = iv_and_ciphertext.subarray(12)
-  const aes_key = await window.crypto.subtle.importKey('raw', rawKey, 'AES-GCM', false, ['decrypt'])
-  let decrypted = await window.crypto.subtle.decrypt(
-    { name: 'AES-GCM', iv: iv },
-    aes_key,
-    ciphertext
-  )
-  return new TextDecoder().decode(decrypted)
+async function aes_decrypt(ciphertext_hex: string, rawKey: Uint8Array) {
+  console.log('decrypting', ciphertext_hex)
+  const ibe_ciphertext = vetkd.IBECiphertext.deserialize(hex_decode(ciphertext_hex))
+  console.log('ibe_ciphertext', ibe_ciphertext)
+  const ibe_plaintext = ibe_ciphertext.decrypt(rawKey)
+  console.log('ibe_plaintext', ibe_plaintext)
+  return new TextDecoder().decode(ibe_plaintext)
 }
 
 function formatDate(nanoseconds: bigint) {

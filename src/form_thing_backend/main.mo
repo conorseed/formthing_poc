@@ -338,13 +338,13 @@ shared ({ caller = creator }) actor class FormThingActor() {
   public shared ({ caller }) func vetkd_get_public_key() : async Text {
     let { public_key } = await FormThing.vetkd_api.vetkd_public_key({
       canister_id = null;
-      derivation_path = Array.make(Text.encodeUtf8("symmetric_key"));
+      derivation_path = Array.make(Text.encodeUtf8("ibe_encryption"));
       key_id = { curve = #bls12_381; name = "test_key_1" };
     });
     return Hex.encode(Blob.toArray(public_key));
   };
 
-  public shared ({ caller }) func vetkd_get_symmetric_key(derivation_id : Blob, encryption_public_key : Blob) : async Text {
+  public shared ({ caller }) func vetkd_get_decryption_key(derivation_id : Blob, encryption_public_key : Blob) : async Text {
     // TO DO:
     // - Check caller has privilege to access this key (is this needed?)
     //   - Anon can only access "data" key on form
@@ -353,7 +353,7 @@ shared ({ caller = creator }) actor class FormThingActor() {
 
     let { encrypted_key } = await FormThing.vetkd_api.vetkd_encrypted_key({
       derivation_id;
-      public_key_derivation_path = Array.make(Text.encodeUtf8("symmetric_key"));
+      public_key_derivation_path = Array.make(Text.encodeUtf8("ibe_encryption"));
       key_id = { curve = #bls12_381; name = "test_key_1" };
       encryption_public_key;
     });

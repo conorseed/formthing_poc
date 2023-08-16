@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "frontend": "cd src/form_thing_frontend && vite",
+    "frontend": "cd src/form_thing_frontend && vite --force",
     "frontend_build": "cd src/form_thing_frontend && run-p type-check build-only",
     "postinstall": "(cd src/form_thing_frontend && npm install);"
   },
