@@ -52,7 +52,11 @@
     </section>
     <section>
       <h2 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-4xl mb-6">Entries</h2>
-      <ul role="list" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <ul
+        v-if="!entries_loading && entries && entries.length"
+        role="list"
+        class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
+      >
         <li
           v-for="(entry, i) in entries"
           :key="entry.created.toString()"
@@ -70,7 +74,37 @@
           <div v-else>Entry could not be decrypted</div>
         </li>
       </ul>
-      <div v-if="!entries || !entries.length">No entries yet.</div>
+      <div v-if="!entries_loading && (!entries || !entries.length)">No entries yet.</div>
+      <ul
+        v-if="entries_loading"
+        role="list"
+        class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
+      >
+        <li class="col-span-1 divide-y divide-gray-200 rounded-lg bg-white shadow p-6">
+          <div class="h-2.5 bg-gray-400 rounded-full mb-4 animate-pulse"></div>
+          <div class="pt-4">
+            <div class="h-2 bg-gray-400 rounded-full w-40 mb-2.5 animate-pulse"></div>
+            <div class="h-2 bg-gray-400 rounded-full w-32 mb-2.5 animate-pulse"></div>
+            <div class="h-2 bg-gray-400 rounded-full w-44 mb-2.5 animate-pulse"></div>
+          </div>
+        </li>
+        <li class="col-span-1 divide-y divide-gray-200 rounded-lg bg-white shadow p-6">
+          <div class="h-2.5 bg-gray-400 rounded-full mb-4 animate-pulse"></div>
+          <div class="pt-4">
+            <div class="h-2 bg-gray-400 rounded-full w-40 mb-2.5 animate-pulse"></div>
+            <div class="h-2 bg-gray-400 rounded-full w-32 mb-2.5 animate-pulse"></div>
+            <div class="h-2 bg-gray-400 rounded-full w-44 mb-2.5 animate-pulse"></div>
+          </div>
+        </li>
+        <li class="col-span-1 divide-y divide-gray-200 rounded-lg bg-white shadow p-6">
+          <div class="h-2.5 bg-gray-400 rounded-full mb-4 animate-pulse"></div>
+          <div class="pt-4">
+            <div class="h-2 bg-gray-400 rounded-full w-40 mb-2.5 animate-pulse"></div>
+            <div class="h-2 bg-gray-400 rounded-full w-32 mb-2.5 animate-pulse"></div>
+            <div class="h-2 bg-gray-400 rounded-full w-44 mb-2.5 animate-pulse"></div>
+          </div>
+        </li>
+      </ul>
     </section>
   </main>
 </template>
@@ -163,11 +197,14 @@ interface EntryDecrypted {
 type EntriesDecrypted = Array<EntryDecrypted>
 
 const entries = ref<EntriesDecrypted | EntriesReturn>()
+const entries_loading = ref(true)
 async function get_entries() {
+  entries_loading.value = true
   const res = await form_thing_backend.get_entries(form_id.value)
   // return early if error
   if ('err' in res) {
     console.warn('get_entries', res.err)
+    entries_loading.value = false
     return
   }
 
@@ -192,6 +229,7 @@ async function get_entries() {
   )
   entries.value = decrypted_entries
   console.log('entries retrieved', entries.value)
+  entries_loading.value = false
 }
 
 // decrypt form data
