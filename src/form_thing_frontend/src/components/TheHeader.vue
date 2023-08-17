@@ -10,10 +10,41 @@
         </a>
       </div>
       <div class="flex flex-1 justify-end">
-        <a href="#" class="text-sm font-semibold leading-6 text-gray-900"
-          >Log in <span aria-hidden="true">&rarr;</span></a
+        <button
+          v-if="!authStore.actor"
+          @click="login"
+          class="text-sm font-semibold leading-6 text-gray-900"
         >
+          Log in <span aria-hidden="true">&rarr;</span>
+        </button>
+        <button
+          v-if="authStore.actor"
+          @click="logout"
+          class="text-sm font-semibold leading-6 text-gray-900"
+        >
+          <span aria-hidden="true">&larr;</span>
+          Log out ({{ authStore.principal?.toString().substring(0, 5) + '..' }})
+        </button>
       </div>
     </nav>
   </header>
 </template>
+
+<script setup lang="ts">
+import { useAuthStore } from '@/stores/auth'
+
+const authStore = useAuthStore()
+
+const login = async (e: Event) => {
+  e.preventDefault()
+  await authStore.login()
+  console.log('principal', authStore.principal)
+  console.log('actor', authStore.actor)
+}
+
+const logout = async (e: Event) => {
+  e.preventDefault()
+  await authStore.logout()
+  console.log('logged out')
+}
+</script>

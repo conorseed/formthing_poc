@@ -3,7 +3,7 @@ dist
 .dfx/
 node_modules/
 src/declarations/
-
+.env
 # Logs
 logs
 *.log

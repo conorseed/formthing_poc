@@ -6,13 +6,13 @@
       "type": "motoko"
     },
     "vetkd_system_api": {
-      "candid": "src/vetkd/vetkd_system_api.did",
       "type": "custom",
+      "candid": "src/vetkd/vetkd_system_api.did",
       "wasm": "src/vetkd/vetkd_system_api.wasm"
     },
     "internet_identity": {
-      "candid": "src/internet_identity/internet_identity.did",
       "type": "custom",
+      "candid": "src/internet_identity/internet_identity.did",
       "wasm": "src/internet_identity/internet_identity.wasm"
     }
   },

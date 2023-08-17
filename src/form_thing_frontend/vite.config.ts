@@ -9,8 +9,9 @@ import Components from 'unplugin-vue-components/vite'
 export default defineConfig({
   plugins: [
     EnvironmentPlugin('all', { prefix: 'CANISTER_' }),
+    EnvironmentPlugin('all', { prefix: 'CANISTER_', defineOn: 'import.meta.env' }),
     EnvironmentPlugin('all', { prefix: 'DFX_' }),
-    EnvironmentPlugin({ BACKEND_CANISTER_ID: '' }),
+    EnvironmentPlugin('all', { prefix: 'DFX_', defineOn: 'import.meta.env' }),
     wasm(),
     vue(),
     Components()

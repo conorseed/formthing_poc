@@ -110,13 +110,11 @@
 </template>
 
 <script setup lang="ts">
-import * as agent from '@dfinity/agent'
 import * as vetkd from 'ic-vetkd-utils'
 import { form_thing_backend } from '@root/declarations/form_thing_backend'
-import { ref, computed, watch } from 'vue'
+import { ref, watch } from 'vue'
 import type {
   Result,
-  Result_1,
   EntriesReturn
 } from '@root/declarations/form_thing_backend/form_thing_backend.did'
 
@@ -289,11 +287,9 @@ async function aes_encrypt(message: string, rawKey: Uint8Array) {
 
   // return early if form is not ready
   if (!form.value || !('ok' in form.value)) return
-  // return early if form_key_public is not ready
-  if (!form_key_public.value) return
 
   const ciphertext = vetkd.IBECiphertext.encrypt(
-    form_key_public.value,
+    rawKey,
     hex_decode(form.value.ok.id),
     message_encoded,
     seed
