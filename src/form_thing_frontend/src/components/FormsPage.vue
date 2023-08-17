@@ -1,5 +1,5 @@
 <template>
-  <main class="mx-auto max-w-7xl p-6 lg:px-8">
+  <div>
     <section v-if="form && 'ok' in form">
       <h2 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-4xl mb-6">
         {{ form.ok.name }}
@@ -106,7 +106,7 @@
         </li>
       </ul>
     </section>
-  </main>
+  </div>
 </template>
 
 <script setup lang="ts">

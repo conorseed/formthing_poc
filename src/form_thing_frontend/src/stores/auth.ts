@@ -60,30 +60,38 @@ export const useAuthStore = defineStore('auth', () => {
     agent.value = null
   }
 
-  const retry_login = async () => {
+  const login_retry = async () => {
     console.log('retry_login')
-    // create an auth client
-    const authClient = await AuthClient.create()
-    const isAuthenticated = await authClient.isAuthenticated()
 
-    if (isAuthenticated) {
-      // set identity if authed
-      identity.value = authClient.getIdentity()
-      // store the principal for ease  if use
-      principal.value = identity.value.getPrincipal()
-      // Using the identity obtained from the auth client, we can create an agent to interact with the IC.
-      agent.value = new HttpAgent({ identity: identity.value })
-      // Using the interface description of our webapp, we create an actor that we use to call the service methods.
-      actor.value = createActor(import.meta.env.CANISTER_ID_INTERNET_IDENTITY, {
-        agent: agent.value
-      })
-    }
+    const authClient = await AuthClient.create()
+
+    if (!(await isAuthenticated())) return false
+
+    // set identity if authed
+    identity.value = authClient.getIdentity()
+    // store the principal for ease  if use
+    principal.value = identity.value.getPrincipal()
+    // Using the identity obtained from the auth client, we can create an agent to interact with the IC.
+    agent.value = new HttpAgent({ identity: identity.value })
+    // Using the interface description of our webapp, we create an actor that we use to call the service methods.
+    actor.value = createActor(import.meta.env.CANISTER_ID_INTERNET_IDENTITY, {
+      agent: agent.value
+    })
+
+    return false
   }
 
-  retry_login()
+  // A function to check if the user is authenticated
+  const isAuthenticated = async (authClient?: AuthClient | null) => {
+    if (!authClient) {
+      authClient = await AuthClient.create()
+    }
+    const isAuthenticated = await authClient.isAuthenticated()
+    return isAuthenticated
+  }
 
   // return the store
-  return { actor, principal, login, logout }
+  return { actor, principal, login, logout, login_retry, isAuthenticated }
 })
 
 // https://github.com/dfinity/examples/tree/master/motoko/internet_identity_integration
