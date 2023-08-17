@@ -12,8 +12,8 @@
     },
     "internet_identity": {
       "type": "custom",
-      "candid": "src/internet_identity/internet_identity.did",
-      "wasm": "src/internet_identity/internet_identity.wasm"
+      "candid": "src/internet_identity/internet_identity_dev.did",
+      "wasm": "src/internet_identity/internet_identity_dev.wasm.gz"
     }
   },
   "output_env_file": "src/form_thing_frontend/.env",
