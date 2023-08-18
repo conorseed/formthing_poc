@@ -1,27 +1,44 @@
 <template>
-  <header class="bg-white">
+  <header class="bg-indigo-950">
     <nav
       class="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8"
       aria-label="Global"
     >
-      <div class="flex lg:flex-1">
-        <RouterLink :to="{ name: 'home' }" class="-m-1.5 p-1.5 font-bold">
-          Form<span class="text-indigo-500">Thing</span>
+      <div class="flex">
+        <RouterLink :to="{ name: 'home' }" class="-m-1.5 p-1.5 font-bold text-white">
+          Form<span class="text-indigo-400">Thing</span>
         </RouterLink>
       </div>
-      <div class="flex flex-1 justify-end">
+      <div v-if="authStore.actor" class="hidden md:flex justify-center">
+        <div class="ml-10 flex items-baseline space-x-4">
+          <RouterLink
+            v-for="item in navigation"
+            :key="item.name"
+            :to="item.to"
+            :class="[
+              router.currentRoute.value.name == item.to.name
+                ? 'text-white underline underline-offset-8'
+                : 'text-gray-400 hover:text-white hover:underline hover:underline-offset-8',
+              'rounded-md px-3 py-2 text-sm font-medium transition-all'
+            ]"
+            :aria-current="router.currentRoute.value.name == item.to.name ? 'page' : undefined"
+            >{{ item.name }}</RouterLink
+          >
+        </div>
+      </div>
+      <div class="flex justify-end">
         <button
           v-if="!authStore.actor"
           @click="login"
-          class="text-sm font-semibold leading-6 text-gray-900 px-3 py-1"
+          class="text-sm font-semibold leading-6 text-white px-3 py-1"
         >
           Log in <span aria-hidden="true">&rarr;</span>
         </button>
         <Popover v-if="authStore.actor" class="relative">
           <PopoverButton
-            class="inline-flex items-center gap-x-1 text-sm font-semibold leading-6 text-gray-900 px-3 py-1"
+            class="inline-flex items-center gap-x-1 text-sm font-semibold leading-6 text-white px-3 py-1"
           >
-            <span>My Account</span>
+            <span>Account</span>
             <ChevronDownIcon class="h-5 w-5" aria-hidden="true" />
           </PopoverButton>
 
@@ -37,38 +54,8 @@
               <div
                 class="w-screen max-w-md flex-auto overflow-hidden rounded-3xl bg-white text-sm leading-6 shadow-lg ring-1 ring-gray-900/5"
               >
-                <div class="p-4">
-                  <div
-                    v-for="item in resources"
-                    :key="item.name"
-                    class="group relative flex gap-x-6 rounded-lg p-4 hover:bg-gray-50"
-                  >
-                    <div
-                      class="mt-1 flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white"
-                    >
-                      <component
-                        :is="item.icon"
-                        class="h-6 w-6 text-gray-600 group-hover:text-indigo-600"
-                        aria-hidden="true"
-                      />
-                    </div>
-                    <div>
-                      <RouterLink :to="item.to" class="font-semibold text-gray-900">
-                        {{ item.name }}
-                        <span class="absolute inset-0" />
-                      </RouterLink>
-                      <p class="mt-1 text-gray-600">{{ item.description }}</p>
-                    </div>
-                  </div>
-                </div>
                 <div class="bg-gray-50 p-8">
-                  <div class="flex justify-between">
-                    <h3 class="text-sm font-semibold leading-6 text-gray-500">Account</h3>
-                    <button @click="logout" class="text-sm font-semibold leading-6 text-indigo-600">
-                      Log out <span aria-hidden="true">&rarr;</span>
-                    </button>
-                  </div>
-                  <div class="mt-6 space-y-6">
+                  <div class="flex justify-between gap-2">
                     <div v-if="authStore.principal">
                       <button
                         @click="copy(authStore.principal.toString(), $event)"
@@ -83,6 +70,12 @@
                         <span class="text-xs">{{ authStore.principal?.toString() }}</span>
                       </button>
                     </div>
+                    <button
+                      @click="logout"
+                      class="text-sm font-semibold leading-6 text-indigo-600 flex-shrink-0"
+                    >
+                      Log out <span aria-hidden="true">&rarr;</span>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -105,11 +98,11 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 const authStore = useAuthStore()
 
-const resources = [
+const navigation = [
   {
     name: 'Forms',
     description: 'View all forms you have access to',
-    to: 'account',
+    to: { name: 'admin' },
     icon: PencilSquareIcon
   }
 ]
@@ -128,7 +121,7 @@ const login = async (e: Event) => {
   e.preventDefault()
   await authStore.login()
   if (await authStore.isAuthenticated()) {
-    router.push({ name: 'account' })
+    router.push({ name: 'admin' })
   }
 }
 

@@ -22,14 +22,15 @@ const router = createRouter({
       ]
     },
     {
-      path: '/account',
-      component: () => import('@/views/MainView.vue'),
+      path: '/admin',
+      component: () => import('@/views/AdminView.vue'),
       meta: { requiresAuth: true },
       children: [
         {
           path: '',
-          name: 'account',
-          component: () => import('@/components/FormsPage.vue')
+          name: 'admin',
+          component: () => import('@/components/FormsPage.vue'),
+          meta: { title: 'Forms' }
         }
       ]
     }

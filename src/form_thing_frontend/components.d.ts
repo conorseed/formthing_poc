@@ -7,12 +7,14 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
-    copy: typeof import('./src/components/LoginPage copy.vue')['default']
+    copy: typeof import('./src/components/FormsPage copy.vue')['default']
     FormsPage: typeof import('./src/components/FormsPage.vue')['default']
     HomePage: typeof import('./src/components/HomePage.vue')['default']
     LoginPage: typeof import('./src/components/LoginPage.vue')['default']
+    PageHeader: typeof import('./src/components/PageHeader.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    TestPage: typeof import('./src/components/TestPage.vue')['default']
     TheHeader: typeof import('./src/components/TheHeader.vue')['default']
   }
 }
