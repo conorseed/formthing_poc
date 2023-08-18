@@ -39,7 +39,7 @@ export const useAuthStore = defineStore('auth', () => {
     // Using the identity obtained from the auth client, we can create an agent to interact with the IC.
     agent.value = new HttpAgent({ identity: identity.value })
     // Using the interface description of our webapp, we create an actor that we use to call the service methods.
-    actor.value = createActor(import.meta.env.CANISTER_ID_INTERNET_IDENTITY, {
+    actor.value = createActor(import.meta.env.CANISTER_ID_FORM_THING_BACKEND, {
       agent: agent.value
     })
 
@@ -74,7 +74,7 @@ export const useAuthStore = defineStore('auth', () => {
     // Using the identity obtained from the auth client, we can create an agent to interact with the IC.
     agent.value = new HttpAgent({ identity: identity.value })
     // Using the interface description of our webapp, we create an actor that we use to call the service methods.
-    actor.value = createActor(import.meta.env.CANISTER_ID_INTERNET_IDENTITY, {
+    actor.value = createActor(import.meta.env.CANISTER_ID_FORM_THING_BACKEND, {
       agent: agent.value
     })
 
