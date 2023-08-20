@@ -1,6 +1,7 @@
 // FormThing Imports
 import Array "mo:base/Array";
 import Blob "mo:base/Blob";
+import Bool "mo:base/Bool";
 import Buffer "mo:base/Buffer";
 import Nat "mo:base/Nat";
 import Principal "mo:base/Principal";
@@ -44,7 +45,7 @@ shared ({ caller = creator }) actor class FormThingActor() {
   var current_form_id : Nat = 0;
 
   // - Create Form
-  public shared ({ caller }) func create_form(name : Text, organisation_id : Text) : async Result.Result<Text, Text> {
+  public shared ({ caller }) func create_form(name : Text, organisation_id : Text) : async FormThing.ResultText {
 
     // Auth - No anonymous calls
     if (Principal.isAnonymous(caller) == true) {
@@ -60,7 +61,6 @@ shared ({ caller = creator }) actor class FormThingActor() {
 
     // Create users buffer and add caller as user
     let users = Buffer.Buffer<Principal>(0);
-    users.add(caller);
 
     // Create Form
     let new_form : FormThing.Form = {
@@ -70,6 +70,8 @@ shared ({ caller = creator }) actor class FormThingActor() {
       name;
       organisation_id;
       users;
+      owner = caller;
+      status = #inactive;
     };
 
     // add form to forms
@@ -104,7 +106,12 @@ shared ({ caller = creator }) actor class FormThingActor() {
   };
 
   // - Get Form by ID
-  public shared ({ caller }) func get_form_by_id(form_id : Text) : async Result.Result<FormThing.FormReturn, Text> {
+  public shared ({ caller }) func get_form_by_id(form_id : Text) : async FormThing.ResultFormReturn {
+
+    // Auth - No anonymous calls
+    if (Principal.isAnonymous(caller) == true) {
+      return #err("You must be logged in to use this function");
+    };
 
     // find form
     let form = Map.find<Text, FormThing.Form>(stable_forms, func(k, v) { k == form_id });
@@ -122,6 +129,14 @@ shared ({ caller = creator }) actor class FormThingActor() {
         // convert users buffer to array
         let users = Buffer.toArray<Principal>(found_form.users);
 
+        // get entries total
+        let entries_check = Map.find<Text, FormThing.Entries>(stable_entries, func(k, v) { k == form_id });
+
+        let entries_total : Nat = switch (entries_check) {
+          case null { 0 };
+          case (?(key, found_entries)) { found_entries.size() };
+        };
+
         // create return form
         let form_return : FormThing.FormReturn = {
           id = found_form.id;
@@ -130,6 +145,9 @@ shared ({ caller = creator }) actor class FormThingActor() {
           created = found_form.created;
           updated = found_form.updated;
           users;
+          entries_total;
+          status = found_form.status;
+          owner = found_form.owner;
         };
 
         #ok(form_return);
@@ -139,7 +157,7 @@ shared ({ caller = creator }) actor class FormThingActor() {
   };
 
   // - Get Form by ID with nonce
-  public func get_form_by_id_with_nonce(form_id : Text) : async Result.Result<FormThing.FormWithNonce, Text> {
+  public func get_form_by_id_with_nonce(form_id : Text) : async FormThing.ResultFormReturnPublicWithNonce {
 
     // find form
     let form = Map.find<Text, FormThing.Form>(stable_forms, func(k, v) { k == form_id });
@@ -169,13 +187,10 @@ shared ({ caller = creator }) actor class FormThingActor() {
         ignore Map.put(stable_nonces, thash, nonce, nonce_check);
 
         // create return form
-        let form_return : FormThing.FormWithNonce = {
+        let form_return : FormThing.FormReturnPublicWithNonce = {
           id = found_form.id;
           name = found_form.name;
-          organisation_id = found_form.organisation_id;
-          created = found_form.created;
-          updated = found_form.updated;
-          users;
+          status = found_form.status;
           nonce;
         };
 
@@ -186,7 +201,7 @@ shared ({ caller = creator }) actor class FormThingActor() {
   };
 
   // - Get Forms by User Principal
-  public shared ({ caller }) func get_forms_by_user_principal() : async Result.Result<[FormThing.FormReturn], Text> {
+  public shared ({ caller }) func get_forms_by_user_principal() : async FormThing.ResultFormReturnArray {
 
     // Auth - No anonymous calls
     if (Principal.isAnonymous(caller) == true) {
@@ -221,6 +236,14 @@ shared ({ caller = creator }) actor class FormThingActor() {
                 // convert users buffer to array
                 let users = Buffer.toArray<Principal>(found_form.users);
 
+                // get entries total
+                let entries_check = Map.find<Text, FormThing.Entries>(stable_entries, func(k, v) { k == form_id });
+
+                let entries_total : Nat = switch (entries_check) {
+                  case null { 0 };
+                  case (?(key, found_entries)) { found_entries.size() };
+                };
+
                 // create return form
                 let form_return : FormThing.FormReturn = {
                   id = found_form.id;
@@ -229,6 +252,9 @@ shared ({ caller = creator }) actor class FormThingActor() {
                   created = found_form.created;
                   updated = found_form.updated;
                   users;
+                  entries_total;
+                  owner = found_form.owner;
+                  status = found_form.status;
                 };
 
                 forms.add(form_return);
@@ -304,7 +330,7 @@ shared ({ caller = creator }) actor class FormThingActor() {
    */
 
   // - Create Entry
-  public func create_entry(form_id : Text, data : Text, nonce : Text) : async Result.Result<Text, Text> {
+  public func create_entry(form_id : Text, data : Text, nonce : Text) : async FormThing.ResultText {
 
     // find form
     let form = Map.find<Text, FormThing.Form>(stable_forms, func(k, v) { k == form_id });
@@ -391,7 +417,12 @@ shared ({ caller = creator }) actor class FormThingActor() {
   };
 
   // - Get entries for form
-  public func get_entries(form_id : Text) : async Result.Result<FormThing.EntriesReturn, Text> {
+  public shared ({ caller }) func get_entries(form_id : Text) : async FormThing.ResultEntriesReturn {
+
+    // Auth - No anonymous calls
+    if (Principal.isAnonymous(caller) == true) {
+      return #err("You must be logged in to use this function");
+    };
 
     // find form
     let form = Map.find<Text, FormThing.Form>(stable_forms, func(k, v) { k == form_id });
@@ -433,20 +464,66 @@ shared ({ caller = creator }) actor class FormThingActor() {
     return Hex.encode(Blob.toArray(public_key));
   };
 
-  public shared ({ caller }) func vetkd_get_decryption_key(derivation_id : Blob, encryption_public_key : Blob) : async Text {
-    // TO DO:
-    // - Check caller has privilege to access this key (is this needed?)
-    //   - Anon can only access "data" key on form
-    //   - User can access both "data" and "admin" keys on form
-    // - Check if valid derivation_id
+  public shared ({ caller }) func vetkd_get_decryption_key(derivation_id : Blob, encryption_public_key : Blob) : async FormThing.ResultText {
 
+    // Auth - No anonymous calls
+    if (Principal.isAnonymous(caller) == true) {
+      return #err("You must be logged in to use this function");
+    };
+
+    // convert derivation_id to text
+    let form_id_check = Text.decodeUtf8(derivation_id);
+    // make sure form_id is not null
+    let form_id : Text = switch (form_id_check) {
+      case null {
+        return #err("Invalid derivation_id");
+      };
+      case (?form_id_text) {
+        form_id_text;
+      };
+    };
+
+    // Check if valid form_id
+    let form_check = Map.find<Text, FormThing.Form>(stable_forms, func(k, v) { k == form_id });
+
+    // check if caller has permissions to access this key
+    let can_access_key : Bool = switch (form_check) {
+
+      // return early if form not found
+      case null {
+        return #err("Form not found");
+      };
+
+      case (?(key, found_form)) {
+
+        // check if caller is owner
+        if (found_form.owner == caller) {
+          true;
+        } else {
+          // check if caller is user
+          let found_user_index = Buffer.indexOf<Principal>(caller, found_form.users, func(user) { user.0 == caller });
+
+          switch (found_user_index) {
+            // cannot access key if not found
+            case null {
+              return #err("You do not have permission to access this key");
+            };
+            // can access key if found
+            case (?index) { true };
+          };
+        };
+
+      };
+    };
+
+    // get public key
     let { encrypted_key } = await FormThing.vetkd_api.vetkd_encrypted_key({
       derivation_id;
       public_key_derivation_path = Array.make(Text.encodeUtf8("ibe_encryption"));
       key_id = { curve = #bls12_381; name = "test_key_1" };
       encryption_public_key;
     });
-    return Hex.encode(Blob.toArray(encrypted_key));
+    return #ok(Hex.encode(Blob.toArray(encrypted_key)));
   };
 
 };

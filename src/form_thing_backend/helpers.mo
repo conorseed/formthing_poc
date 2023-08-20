@@ -4,6 +4,7 @@ import Buffer "mo:base/Buffer";
 import Char "mo:base/Char";
 import Int "mo:base/Int";
 import Principal "mo:base/Principal";
+import Result "mo:base/Result";
 import Text "mo:base/Text";
 
 import Map "vendor/map/Map";
@@ -23,12 +24,16 @@ module FormThingHelpers {
     users : Buffer.Buffer<Principal>; // buffer of users with access to the organisation
   };
 
+  public type FormStatus = { #active; #inactive };
+
   public type FormBase = {
     id : Text; // id of the form
     created : Int; // timestamp from Time.now() of when created
     updated : Int; // timestamp from Time.now() of when updated
     name : Text; // name of the form
     organisation_id : Text; // id of organisation the form belongs to
+    owner : Principal; // owner of the form
+    status : FormStatus; // status of the form
   };
 
   public type Form = FormBase and {
@@ -37,10 +42,7 @@ module FormThingHelpers {
 
   public type FormReturn = FormBase and {
     users : [Principal]; // array of users with access to the form
-  };
-
-  public type FormWithNonce = FormReturn and {
-    nonce : Text; // nonce
+    entries_total : Nat; // total number of entries
   };
 
   public type Nonce = {
@@ -52,7 +54,11 @@ module FormThingHelpers {
     lock : Bool; // lock
   };
 
-  public type FormReturnWithNonce = FormReturn and Nonce;
+  public type FormReturnPublicWithNonce = Nonce and {
+    id : Text; // id of the form
+    name : Text; // name of the form
+    status : FormStatus; // status of the form
+  };
 
   public type Entry = {
     created : Int; // timestamp from Time.now() of when created
@@ -63,6 +69,12 @@ module FormThingHelpers {
   public type Entries = Buffer.Buffer<Entry>; // buffer of entries
 
   public type EntriesReturn = [Entry]; // array of entries
+
+  public type ResultText = Result.Result<Text, Text>;
+  public type ResultFormReturn = Result.Result<FormReturn, Text>;
+  public type ResultFormReturnArray = Result.Result<[FormReturn], Text>;
+  public type ResultFormReturnPublicWithNonce = Result.Result<FormReturnPublicWithNonce, Text>;
+  public type ResultEntriesReturn = Result.Result<EntriesReturn, Text>;
 
   /*
    * HELPER FUNCTIONS
