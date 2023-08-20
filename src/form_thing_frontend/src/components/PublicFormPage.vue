@@ -47,7 +47,7 @@
 
 <script setup lang="ts">
 import { useVetkdUtils } from '@/composables/useVetkdUtils'
-import type { Result_1 } from '@root/declarations/form_thing_backend/form_thing_backend.did'
+import type { ResultFormReturnPublicWithNonce } from '@root/declarations/form_thing_backend/form_thing_backend.did'
 import { ref } from 'vue'
 import { useRoute } from 'vue-router'
 
@@ -55,7 +55,7 @@ const route = useRoute()
 const vetkdUtils = useVetkdUtils()
 
 // Fetch Form
-const form = ref<Result_1>()
+const form = ref<ResultFormReturnPublicWithNonce>()
 const form_res = await vetkdUtils.form_thing_backend.get_form_by_id_with_nonce(
   route.params.formId as string
 )

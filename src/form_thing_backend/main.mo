@@ -491,7 +491,7 @@ shared ({ caller = creator }) actor class FormThingActor() {
 
       // return early if form not found
       case null {
-        return #err("Form not found");
+        return #err("Form ID '" # form_id # "' not found");
       };
 
       case (?(key, found_form)) {

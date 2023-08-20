@@ -85,6 +85,7 @@ import { useVetkdUtils } from '@/composables/useVetkdUtils'
 import type { EntriesReturn } from '@root/declarations/form_thing_backend/form_thing_backend.did'
 import { onMounted, ref } from 'vue'
 import { PencilSquareIcon, DocumentDuplicateIcon, CheckIcon } from '@heroicons/vue/24/outline'
+import { useAuthStore } from '@/stores/authStore'
 
 const props = defineProps({
   form_id: {
@@ -130,10 +131,10 @@ const entries_loading = ref(true)
 
 async function get_entries() {
   entries_loading.value = true
-  const res = await vetkdUtils.form_thing_backend.get_entries(props.form_id)
+  const res = await useAuthStore().actor?.get_entries(props.form_id)
+  console.log('get_entries', res)
   // return early if error
-  if ('err' in res) {
-    console.warn('get_entries', res.err)
+  if (!res || 'err' in res) {
     entries_loading.value = false
     return
   }
@@ -151,6 +152,11 @@ async function get_entries() {
         ciphertext_hex: entry.data,
         rawKey: vetkdUtils.key_derived.value
       })
+      if (!decrypted_data) {
+        return {
+          ...entry
+        }
+      }
       return {
         form_id: entry.form_id,
         data: JSON.parse(decrypted_data),

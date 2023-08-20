@@ -31,13 +31,13 @@ const router = createRouter({
           path: '',
           name: 'admin',
           component: () => import('@/components/AdminFormsPage.vue'),
-          meta: { title: 'Forms' }
+          meta: { requiresAuth: true, title: 'Forms' }
         },
         {
           path: 'form/:formId',
           name: 'adminFormSingle',
           component: () => import('@/components/AdminFormSinglePage.vue'),
-          meta: { title: 'Form Details' }
+          meta: { requiresAuth: true, title: 'Form Details' }
         }
       ]
     },
@@ -99,5 +99,13 @@ router.afterEach((from, to) => {
     })
   }
 })
+
+// declare types
+declare module 'vue-router' {
+  interface RouteMeta {
+    requiresAuth: boolean
+    title?: string
+  }
+}
 
 export default router

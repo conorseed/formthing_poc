@@ -5,7 +5,10 @@
         <div class="rounded-lg bg-white shadow p-6 mb-4">
           <h2 class="text-xl font-bold tracking-tight text-gray-900 mb-6">{{ form.name }}</h2>
           <p>ID: {{ form.id }}</p>
-          <p>Created on: {{ formatDate(form.created) }}</p>
+          <p>Status: {{ form.status }}</p>
+          <p class="truncate">
+            Created by {{ form.owner.toString() }} on: {{ formatDate(form.created) }}
+          </p>
           <p>Last Updated: {{ formatDate(form.updated) }}</p>
           <p class="truncate">Users: {{ form.users }}</p>
           <p>Share: {{ `${origin}/forms/${form.id}` }}</p>
@@ -28,7 +31,7 @@
       </div>
       <AdminFormSinglePageEntries
         :form_id="form.id"
-        :entries_total="Math.ceil(Math.random() * 100)"
+        :entries_total="Number(form.entries_total)"
         class="lg:col-span-6"
       />
     </div>
@@ -65,10 +68,8 @@ const { formatDate } = useGeneralUtils()
 
 const form = ref<FormReturn | undefined>(undefined)
 
-if (!route.meta.title.includes('Form not found')) {
-  const res = await formStore.getFormById(route.params.formId as string)
-  form.value = res
-}
+const res = await formStore.getFormById(route.params.formId as string)
+form.value = res
 
 const origin = window.location.origin
 

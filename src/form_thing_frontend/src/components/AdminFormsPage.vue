@@ -20,20 +20,18 @@
             <p class="text-base font-semibold leading-6 text-gray-900">{{ form.name }}</p>
             <p
               :class="[
-                statuses[statusNames[Math.floor(Math.random() * 3)]],
-                'rounded-md whitespace-nowrap mt-0.5 px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset'
+                getStatusClasses(Object.keys(form.status)[0]),
+                'rounded-md whitespace-nowrap mt-0.5 px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset capitalize'
               ]"
             >
-              {{ statusNames[Math.floor(Math.random() * 3)] }}
+              {{ Object.keys(form.status)[0] }}
             </p>
             <div class="flex w-16 gap-x-2.5 items-center">
               <div>
                 <span class="sr-only">Total entries</span>
                 <ChatBubbleLeftIcon class="h-4 w-4 text-gray-400" aria-hidden="true" />
               </div>
-              <span class="text-sm leading-6 text-gray-900">{{
-                Math.ceil(Math.random() * 100)
-              }}</span>
+              <span class="text-sm leading-6 text-gray-900">{{ form.entries_total }}</span>
             </div>
           </div>
           <div class="mt-1 flex items-center gap-x-2 text-xs leading-5 text-gray-500">
@@ -44,7 +42,7 @@
             <svg viewBox="0 0 2 2" class="h-0.5 w-0.5 fill-current">
               <circle cx="1" cy="1" r="1" />
             </svg>
-            <p class="truncate">Created by {{ form.users[0].toString() }}</p>
+            <p class="truncate">Created by {{ form.owner.toString() }}</p>
           </div>
         </div>
         <div class="flex flex-none items-center gap-x-4">
@@ -114,6 +112,7 @@
 
 <script setup lang="ts">
 import { useFormStore } from '@/stores/formStore'
+import { useAuthStore } from '@/stores/authStore'
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
 import { EllipsisVerticalIcon, ChatBubbleLeftIcon, PlusIcon } from '@heroicons/vue/20/solid'
 import { PencilSquareIcon } from '@heroicons/vue/24/outline'
@@ -123,11 +122,18 @@ import { RouterLink } from 'vue-router'
 const { formatDate } = useGeneralUtils()
 
 const statuses = {
-  Complete: 'text-green-700 bg-green-50 ring-green-600/20',
-  'In progress': 'text-gray-600 bg-gray-50 ring-gray-500/10',
-  Archived: 'text-yellow-800 bg-yellow-50 ring-yellow-600/20'
+  active: 'text-green-700 bg-green-50 ring-green-600/20',
+  inactive: 'text-gray-600 bg-gray-50 ring-gray-500/10'
 }
-const statusNames = ['Complete', 'In progress', 'Archived']
+
+const getStatusClasses = (status: string) => {
+  switch (status) {
+    case 'active':
+      return statuses.active
+    case 'inactive':
+      return statuses.inactive
+  }
+}
 
 const formStore = useFormStore()
 if (!formStore.forms.length) {
@@ -139,11 +145,10 @@ if (!formStore.forms.length) {
 }
 
 // else create the form and refresh the page
-// if (!forms.value.length) {
-//   console.log('creating new form')
-//   const rand = Math.random().toString(36).substring(4)
-//   await authStore.actor?.create_form(`Form Thingy ${rand}`, '')
-//   location.reload()
-// }
+if (!formStore.forms.length) {
+  console.log('creating new form')
+  const rand = Math.random().toString(36).substring(4)
+  await useAuthStore().actor?.create_form(`Form Thingy ${rand}`, '')
+  location.reload()
+}
 </script>
-@/composables/useGeneralUtils
