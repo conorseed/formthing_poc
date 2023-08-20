@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory, START_LOCATION } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
+import { useAuthStore } from '@/stores/authStore'
 import { nextTick } from 'vue'
+import { useFormStore } from '@/stores/formStore'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -29,11 +30,30 @@ const router = createRouter({
         {
           path: '',
           name: 'admin',
-          component: () => import('@/components/FormsPage.vue'),
+          component: () => import('@/components/AdminFormsPage.vue'),
           meta: { title: 'Forms' }
+        },
+        {
+          path: 'form/:formId',
+          name: 'adminFormSingle',
+          component: () => import('@/components/AdminFormSinglePage.vue'),
+          meta: { title: 'Form Details' }
         }
       ]
-    }
+    },
+    {
+      path: '/forms/',
+      component: () => import('@/views/MainView.vue'),
+      children: [
+        {
+          path: ':formId',
+          name: 'formSingle',
+          component: () => import('@/components/PublicFormPage.vue')
+        }
+      ]
+    },
+    // otherwise redirect to home
+    { path: '/:pathMatch(.*)*', name: 'NotFound', redirect: { name: 'home' } }
   ]
 })
 
@@ -54,6 +74,22 @@ router.beforeEach(async (to, from) => {
   }
 })
 
+// Change title meta for AdminFormSinglePage
+// router.beforeEach(async (to) => {
+//   if (to.name !== 'adminFormSingle') return
+
+//   // get the form id
+//   const formId = to.params.formId as string
+//   // get the form
+//   const form = await useFormStore().getFormById(formId)
+//   // set the title
+//   if (form) {
+//     to.meta.title = form.name
+//     return
+//   }
+// })
+
+// Focus the body on route change
 router.afterEach((from, to) => {
   if (from.path !== to.path) {
     nextTick(() => {

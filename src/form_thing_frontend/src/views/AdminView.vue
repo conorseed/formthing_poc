@@ -1,10 +1,10 @@
 <template>
   <PageHeader :title="route.meta.title" />
-  <main class="bg-gray-100">
+  <main class="bg-gray-100 min-h-screen">
     <RouterView
       v-slot="{ Component }"
       :key="route.fullPath"
-      class="mx-auto max-w-7xl px-6 pt-10 pb-24 lg:px-8 min-h-screen"
+      class="mx-auto max-w-7xl px-6 pt-10 pb-24 lg:px-8"
     >
       <template v-if="Component">
         <Transition mode="out-in">
@@ -46,5 +46,4 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
 const route = useRoute()
-console.log(route.meta)
 </script>

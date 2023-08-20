@@ -30,13 +30,13 @@
         <button
           v-if="!authStore.actor"
           @click="login"
-          class="text-sm font-semibold leading-6 text-white px-3 py-1"
+          class="text-sm font-semibold leading-6 text-white px-3 py-2"
         >
           Log in <span aria-hidden="true">&rarr;</span>
         </button>
         <Popover v-if="authStore.actor" class="relative">
           <PopoverButton
-            class="inline-flex items-center gap-x-1 text-sm font-semibold leading-6 text-white px-3 py-1"
+            class="inline-flex items-center gap-x-1 text-sm font-semibold leading-6 text-white px-3 py-2"
           >
             <span>Account</span>
             <ChevronDownIcon class="h-5 w-5" aria-hidden="true" />
@@ -92,7 +92,7 @@ import { ref } from 'vue'
 import { Popover, PopoverButton, PopoverPanel } from '@headlessui/vue'
 import { ChevronDownIcon } from '@heroicons/vue/20/solid'
 import { PencilSquareIcon, DocumentDuplicateIcon, CheckIcon } from '@heroicons/vue/24/outline'
-import { useAuthStore } from '@/stores/auth'
+import { useAuthStore } from '@/stores/authStore'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
@@ -131,3 +131,4 @@ const logout = async (e: Event) => {
   router.push({ name: 'home' })
 }
 </script>
+@/stores/authStore

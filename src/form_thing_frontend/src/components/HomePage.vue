@@ -102,7 +102,7 @@
 </template>
 
 <script setup lang="ts">
-import { useAuthStore } from '@/stores/auth'
+import { useAuthStore } from '@/stores/authStore'
 import { useRouter } from 'vue-router'
 
 const authStore = useAuthStore()
@@ -116,3 +116,4 @@ const login = async (e: Event) => {
   }
 }
 </script>
+@/stores/authStore

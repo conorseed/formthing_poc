@@ -12,8 +12,9 @@ export const useAuthStore = defineStore('auth', () => {
     import.meta.env.CANISTER_ID_INTERNET_IDENTITY
   }`
 
-  // create an actor with an agent that is authenticated with the identity returned by the auth client
-
+  /*
+   * Main store values
+   */
   const actor = ref<ActorSubclass<_SERVICE> | null>(null)
   const identity = ref<Identity | null>(null)
   const principal = ref<Principal | null>(null)
@@ -93,5 +94,3 @@ export const useAuthStore = defineStore('auth', () => {
   // return the store
   return { actor, principal, login, logout, login_retry, isAuthenticated }
 })
-
-// https://github.com/dfinity/examples/tree/master/motoko/internet_identity_integration

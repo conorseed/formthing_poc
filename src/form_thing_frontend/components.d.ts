@@ -7,11 +7,15 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
+    AdminFormSinglePage: typeof import('./src/components/AdminFormSinglePage.vue')['default']
+    AdminFormSinglePageEntries: typeof import('./src/components/AdminFormSinglePageEntries.vue')['default']
+    AdminFormsPage: typeof import('./src/components/AdminFormsPage.vue')['default']
     copy: typeof import('./src/components/FormsPage copy.vue')['default']
     FormsPage: typeof import('./src/components/FormsPage.vue')['default']
     HomePage: typeof import('./src/components/HomePage.vue')['default']
     LoginPage: typeof import('./src/components/LoginPage.vue')['default']
     PageHeader: typeof import('./src/components/PageHeader.vue')['default']
+    PublicFormPage: typeof import('./src/components/PublicFormPage.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     TestPage: typeof import('./src/components/TestPage.vue')['default']
