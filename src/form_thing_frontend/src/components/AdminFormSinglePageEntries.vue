@@ -14,12 +14,12 @@
       class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
     >
       <li
-        v-for="(entry, i) in entries"
-        :key="entry.created.toString()"
+        v-for="entry in entries"
+        :key="entry.id"
         class="col-span-1 divide-y divide-gray-200 rounded-lg bg-white shadow p-6"
       >
         <div class="flex justify-between gap-x-4 py-3 text-sm text-gray-500">
-          <span>#{{ i }}</span>
+          <span>#{{ entry.id }}</span>
           <span>Created: {{ formatDate(entry.created) }}</span>
         </div>
         <div v-if="typeof entry.data === 'object'" class="pt-4">
@@ -82,7 +82,7 @@
 <script setup lang="ts">
 import { useGeneralUtils } from '@/composables/useGeneralUtils'
 import { useVetkdUtils } from '@/composables/useVetkdUtils'
-import type { EntriesReturn } from '@root/declarations/form_thing_backend/form_thing_backend.did'
+import type { Entry } from '@root/declarations/form_thing_backend/form_thing_backend.did'
 import { onMounted, ref } from 'vue'
 import { PencilSquareIcon, DocumentDuplicateIcon, CheckIcon } from '@heroicons/vue/24/outline'
 import { useAuthStore } from '@/stores/authStore'
@@ -118,15 +118,19 @@ onMounted(async () => {
 
 // get entries
 interface EntryDecrypted {
+  id: number
   created: bigint
   data: {
     [key: string]: any
   }
   form_id: string
 }
-type EntriesDecrypted = Array<EntryDecrypted>
+type EntryEncrypted = Entry & {
+  id: number
+}
+type EntriesProcessed = Array<EntryDecrypted | EntryEncrypted>
 
-const entries = ref<EntriesDecrypted | EntriesReturn>()
+const entries = ref<EntriesProcessed>()
 const entries_loading = ref(true)
 
 async function get_entries() {
@@ -145,22 +149,24 @@ async function get_entries() {
       // return early if form is not ready
       if (vetkdUtils.key_derived.value == null) {
         return {
-          ...entry
+          id: Number(entry[0]),
+          ...entry[1]
         }
       }
       const decrypted_data = await vetkdUtils.aes_decrypt({
-        ciphertext_hex: entry.data,
+        ciphertext_hex: entry[1].data,
         rawKey: vetkdUtils.key_derived.value
       })
       if (!decrypted_data) {
         return {
-          ...entry
+          id: Number(entry[0]),
+          ...entry[1]
         }
       }
       return {
-        form_id: entry.form_id,
-        data: JSON.parse(decrypted_data),
-        created: entry.created
+        id: Number(entry[0]),
+        ...entry[1],
+        data: JSON.parse(decrypted_data)
       }
     })
   )
