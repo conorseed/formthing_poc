@@ -37,7 +37,8 @@ module FormThingHelpers {
   };
 
   public type Form = FormBase and {
-    users : Buffer.Buffer<Principal>; // buffer of users with access to the form
+    users : [Principal]; // array of users with access to the form
+    next_entry_id : Nat; // next entry id
   };
 
   public type FormReturn = FormBase and {
@@ -66,9 +67,9 @@ module FormThingHelpers {
     data : Text; // encrypted entry data
   };
 
-  public type Entries = Buffer.Buffer<Entry>; // buffer of entries
+  public type Entries = Map.Map<Nat, Entry>; // buffer of entries
 
-  public type EntriesReturn = [Entry]; // array of entries
+  public type EntriesReturn = [(Nat, Entry)]; // array of entries
 
   public type ResultText = Result.Result<Text, Text>;
   public type ResultFormReturn = Result.Result<FormReturn, Text>;

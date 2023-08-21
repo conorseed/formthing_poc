@@ -22,27 +22,27 @@ shared ({ caller = creator }) actor class FormThingActor() {
 
   // FORMS INFORMATION
   // - Hashed by "Form ID"
-  var stable_forms = Map.new<Text, FormThing.Form>(thash);
-  // - Hashed by "User Principal", value is Buffer of "Form ID"s
-  var stable_forms_by_user = Map.new<Principal, Buffer.Buffer<Text>>(phash);
+  stable var stable_forms = Map.new<Text, FormThing.Form>(thash);
+  // - Hashed by "User Principal", value is array of "Form ID"s
+  stable var stable_forms_by_user = Map.new<Principal, [Text]>(phash);
 
   // FORM ENTRIES
   // - Hashed by "Form ID"
-  var stable_entries = Map.new<Text, FormThing.Entries>(thash);
+  stable var stable_entries = Map.new<Text, FormThing.Entries>(thash);
 
   // NONCES
   // - Hashed by "Nonce"
-  var stable_nonces = Map.new<Text, FormThing.NonceCheck>(thash);
+  stable var stable_nonces = Map.new<Text, FormThing.NonceCheck>(thash);
 
   // ORGANISATIONS
   // - Hashed by "Organisation ID"
-  var stable_organisations = Map.new<Text, FormThing.Organisation>(thash);
+  // var stable_organisations = Map.new<Text, FormThing.Organisation>(thash);
 
   /**
    * Forms Functionality
    */
 
-  var current_form_id : Nat = 0;
+  stable var current_form_id : Nat = 0;
 
   // - Create Form
   public shared ({ caller }) func create_form(name : Text, organisation_id : Text) : async FormThing.ResultText {
@@ -59,8 +59,8 @@ shared ({ caller = creator }) actor class FormThingActor() {
     // Get time now
     let time_now = Time.now();
 
-    // Create users buffer and add caller as user
-    let users = Buffer.Buffer<Principal>(0);
+    // Create users array
+    let users : [Principal] = [];
 
     // Create Form
     let new_form : FormThing.Form = {
@@ -72,29 +72,30 @@ shared ({ caller = creator }) actor class FormThingActor() {
       users;
       owner = caller;
       status = #inactive;
+      next_entry_id = 1;
     };
 
     // add form to forms
     ignore Map.put(stable_forms, thash, form_id, new_form);
 
     // add form_id to forms_by_user
-    let found_form_ids = Map.find<Principal, Buffer.Buffer<Text>>(stable_forms_by_user, func(k, v) { k == caller });
+    let found_form_ids = Map.find<Principal, [Text]>(stable_forms_by_user, func(k, v) { k == caller });
 
     switch (found_form_ids) {
 
       // create form_ids if not found
       // add new form_id to form_ids
       case null {
-        let form_ids_buffer = Buffer.Buffer<Text>(0);
-        form_ids_buffer.add(form_id);
+        let form_ids : [Text] = Array.make(form_id);
 
-        ignore Map.put(stable_forms_by_user, phash, caller, form_ids_buffer);
+        ignore Map.put(stable_forms_by_user, phash, caller, form_ids);
       };
 
       // add form_id to form_ids if found
       case (?(key, found_form_ids)) {
-        found_form_ids.add(form_id);
-        ignore Map.put(stable_forms_by_user, phash, caller, found_form_ids);
+        let found_form_ids_buffer = Buffer.fromArray<Text>(found_form_ids);
+        found_form_ids_buffer.add(form_id);
+        ignore Map.put(stable_forms_by_user, phash, caller, Buffer.toArray<Text>(found_form_ids_buffer));
       };
     };
 
@@ -126,15 +127,12 @@ shared ({ caller = creator }) actor class FormThingActor() {
       // return form if found
       case (?(key, found_form)) {
 
-        // convert users buffer to array
-        let users = Buffer.toArray<Principal>(found_form.users);
-
         // get entries total
         let entries_check = Map.find<Text, FormThing.Entries>(stable_entries, func(k, v) { k == form_id });
 
         let entries_total : Nat = switch (entries_check) {
           case null { 0 };
-          case (?(key, found_entries)) { found_entries.size() };
+          case (?(key, found_entries)) { Map.size(found_entries) };
         };
 
         // create return form
@@ -144,7 +142,7 @@ shared ({ caller = creator }) actor class FormThingActor() {
           organisation_id = found_form.organisation_id;
           created = found_form.created;
           updated = found_form.updated;
-          users;
+          users = found_form.users;
           entries_total;
           status = found_form.status;
           owner = found_form.owner;
@@ -171,9 +169,6 @@ shared ({ caller = creator }) actor class FormThingActor() {
 
       // return form if found
       case (?(key, found_form)) {
-
-        // convert users buffer to array
-        let users = Buffer.toArray<Principal>(found_form.users);
 
         // create a nonce and save it
         let nonce = FormThing.create_nonce();
@@ -209,60 +204,56 @@ shared ({ caller = creator }) actor class FormThingActor() {
     };
 
     // find form_ids
-    let form_ids = Map.find<Principal, Buffer.Buffer<Text>>(stable_forms_by_user, func(k, v) { k == caller });
+    let form_ids_check = Map.find<Principal, [Text]>(stable_forms_by_user, func(k, v) { k == caller });
+
+    let form_ids : [Text] = switch (form_ids_check) {
+      // if no form_ids, return empty array
+      case null {
+        return #ok([]);
+      };
+      // otherwise set form_ids
+      case (?(key, found_form_ids)) {
+        found_form_ids;
+      };
+    };
 
     // grab all the forms
     let forms = Buffer.Buffer<FormThing.FormReturn>(0);
 
-    switch (form_ids) {
-      // if no forms, return empty array
-      case null {
-        return #ok([]);
-      };
-      case (?(key, found_form_ids)) {
-        // iterate over form_ids
-        Buffer.iterate<Text>(
-          found_form_ids,
-          func(form_id) {
+    // iterate over form_ids
+    for (form_id in form_ids.vals()) {
+      // find form
+      let form = Map.find<Text, FormThing.Form>(stable_forms, func(k, v) { k == form_id });
 
-            // find form
-            let form = Map.find<Text, FormThing.Form>(stable_forms, func(k, v) { k == form_id });
+      switch (form) {
+        // do nothing if no form found
+        case null {};
 
-            switch (form) {
-              // do nothing if no form found
-              case null {};
+        case (?(key, found_form)) {
 
-              case (?(key, found_form)) {
-                // convert users buffer to array
-                let users = Buffer.toArray<Principal>(found_form.users);
+          // get entries total
+          let entries_check = Map.find<Text, FormThing.Entries>(stable_entries, func(k, v) { k == form_id });
 
-                // get entries total
-                let entries_check = Map.find<Text, FormThing.Entries>(stable_entries, func(k, v) { k == form_id });
+          let entries_total : Nat = switch (entries_check) {
+            case null { 0 };
+            case (?(key, found_entries)) { Map.size(found_entries) };
+          };
 
-                let entries_total : Nat = switch (entries_check) {
-                  case null { 0 };
-                  case (?(key, found_entries)) { found_entries.size() };
-                };
+          // create return form
+          let form_return : FormThing.FormReturn = {
+            id = found_form.id;
+            name = found_form.name;
+            organisation_id = found_form.organisation_id;
+            created = found_form.created;
+            updated = found_form.updated;
+            users = found_form.users;
+            entries_total;
+            owner = found_form.owner;
+            status = found_form.status;
+          };
 
-                // create return form
-                let form_return : FormThing.FormReturn = {
-                  id = found_form.id;
-                  name = found_form.name;
-                  organisation_id = found_form.organisation_id;
-                  created = found_form.created;
-                  updated = found_form.updated;
-                  users;
-                  entries_total;
-                  owner = found_form.owner;
-                  status = found_form.status;
-                };
-
-                forms.add(form_return);
-              };
-            };
-          },
-        )
-
+          forms.add(form_return);
+        };
       };
     };
 
@@ -333,14 +324,14 @@ shared ({ caller = creator }) actor class FormThingActor() {
   public func create_entry(form_id : Text, data : Text, nonce : Text) : async FormThing.ResultText {
 
     // find form
-    let form = Map.find<Text, FormThing.Form>(stable_forms, func(k, v) { k == form_id });
+    let form_check = Map.find<Text, FormThing.Form>(stable_forms, func(k, v) { k == form_id });
 
     // return early if form not found
-    switch (form) {
+    let form = switch (form_check) {
       case null {
         return #err("Form not found");
       };
-      case (?(key, found_form)) {};
+      case (?(key, found_form)) { found_form };
     };
 
     // check nonce
@@ -386,21 +377,48 @@ shared ({ caller = creator }) actor class FormThingActor() {
 
     switch (found_entries) {
 
-      // create entries if not found
-      // add new entry to entries
       case null {
-        let entries_buffer = Buffer.Buffer<FormThing.Entry>(0);
-        entries_buffer.add(new_entry);
-
-        let new_entries : FormThing.Entries = entries_buffer;
-
+        // create entries if not found
+        let new_entries : FormThing.Entries = Map.new<Nat, FormThing.Entry>(nhash);
+        ignore Map.put(new_entries, nhash, form.next_entry_id, new_entry);
+        // add new entry to entries
         ignore Map.put(stable_entries, thash, form_id, new_entries);
+
+        // increment next_entry_id
+        let next_entry_id = form.next_entry_id + 1;
+        let updated_form : FormThing.Form = {
+          created = form.created;
+          updated = form.updated;
+          id = form.id;
+          name = form.name;
+          organisation_id = form.organisation_id;
+          users = form.users;
+          owner = form.owner;
+          status = form.status;
+          next_entry_id;
+        };
+        ignore Map.put(stable_forms, thash, form_id, updated_form);
       };
 
       // add entry to entries if found
       case (?(key, found_entries)) {
-        found_entries.add(new_entry);
+        ignore Map.put(found_entries, nhash, form.next_entry_id, new_entry);
+        // save to stable
         ignore Map.put(stable_entries, thash, form_id, found_entries);
+        // increment next_entry_id
+        let next_entry_id = form.next_entry_id + 1;
+        let updated_form : FormThing.Form = {
+          created = form.created;
+          updated = form.updated;
+          id = form.id;
+          name = form.name;
+          organisation_id = form.organisation_id;
+          users = form.users;
+          owner = form.owner;
+          status = form.status;
+          next_entry_id;
+        };
+        ignore Map.put(stable_forms, thash, form_id, updated_form);
       };
     };
 
@@ -447,7 +465,7 @@ shared ({ caller = creator }) actor class FormThingActor() {
 
       // return entries if found
       case (?(key, found_entries)) {
-        return #ok(Buffer.toArray<FormThing.Entry>(found_entries));
+        return #ok(Map.toArray<Nat, FormThing.Entry>(found_entries));
       };
     };
   };
@@ -501,15 +519,15 @@ shared ({ caller = creator }) actor class FormThingActor() {
           true;
         } else {
           // check if caller is user
-          let found_user_index = Buffer.indexOf<Principal>(caller, found_form.users, func(user) { user.0 == caller });
+          let found_user = Array.find<Principal>(found_form.users, func(user) { user == caller }); //Buffer.indexOf<Principal>(caller, found_form.users, func(user) { user.0 == caller });
 
-          switch (found_user_index) {
+          switch (found_user) {
             // cannot access key if not found
             case null {
               return #err("You do not have permission to access this key");
             };
             // can access key if found
-            case (?index) { true };
+            case (?user) { true };
           };
         };
 
