@@ -11,9 +11,17 @@
           </p>
           <p>Last Updated: {{ formatDate(form.updated) }}</p>
           <p class="truncate">Users: {{ form.users }}</p>
-          <p>Share: {{ `${origin}/forms/${form.id}` }}</p>
         </div>
-        <div>
+        <div class="flex flex-wrap gap-2">
+          <button
+            v-if="form.owner.toString() == authStore.principal?.toString()"
+            @click="openSettingsModal"
+            type="button"
+            class="inline-flex items-center rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+          >
+            <Cog8ToothIcon class="-ml-0.5 mr-1.5 h-5 w-5" aria-hidden="true" />
+            Settings
+          </button>
           <button
             @click="copyLink"
             type="button"
@@ -27,6 +35,13 @@
             <CheckIcon v-else class="-ml-0.5 mr-1.5 h-5 w-5" aria-hidden="true" />
             Copy Form Link
           </button>
+
+          <AdminFormSinglePageSettingsModal
+            :form="form"
+            :open="settingsOpen"
+            @close="settingsOpen = false"
+            @updateSettings="onUpdateSettings"
+          />
         </div>
       </div>
       <AdminFormSinglePageEntries
@@ -57,22 +72,34 @@
 <script setup lang="ts">
 import { useGeneralUtils } from '@/composables/useGeneralUtils'
 import { useFormStore } from '@/stores/formStore'
+import { useAuthStore } from '@/stores/authStore'
 import { useRoute } from 'vue-router'
-import { type FormReturn } from '@root/declarations/form_thing_backend/form_thing_backend.did'
+import {
+  type FormReturn,
+  type FormStatus
+} from '@root/declarations/form_thing_backend/form_thing_backend.did'
 import { ref } from 'vue'
-import { DocumentDuplicateIcon, CheckIcon } from '@heroicons/vue/24/outline'
+import { DocumentDuplicateIcon, CheckIcon, Cog8ToothIcon } from '@heroicons/vue/24/outline'
+import type { Principal } from '@dfinity/principal'
 
 const route = useRoute()
 const formStore = useFormStore()
+const authStore = useAuthStore()
 const { formatDate } = useGeneralUtils()
 
+// setup form
 const form = ref<FormReturn | undefined>(undefined)
-
 const res = await formStore.getFormById(route.params.formId as string)
 form.value = res
 
-const origin = window.location.origin
+if (form.value) {
+  for (const user of form.value.users) {
+    console.log(user.toString())
+  }
+}
 
+// setup share link
+const origin = window.location.origin
 const copied = ref(false)
 const copyLink = (e: Event) => {
   e.preventDefault()
@@ -83,5 +110,57 @@ const copyLink = (e: Event) => {
     copied.value = false
   }, 2000)
 }
+
+// setup settings modal
+const settingsOpen = ref(false)
+const openSettingsModal = () => {
+  settingsOpen.value = true
+}
+
+// on settings update
+const onUpdateSettings = async (
+  settings: {
+    name: string
+    status: 'active' | 'inactive'
+    users: Principal[]
+  }
+) => {
+  console.log('setting update', settings)
+  // check if form exists
+  if (!form.value) {
+    console.log('no form to update')
+    return
+  }
+
+  // check if actor
+  if (!authStore.actor) {
+    console.log('no actor')
+    return
+  }
+
+  // make sure status is valid
+  const status = { [settings.status]: null } as FormStatus
+
+  const res = await authStore.actor.update_form_settings(
+    form.value.id,
+    settings.name,
+    status,
+    settings.users
+  )
+  console.log('update settings res', res)
+
+  if (!res) {
+    console.warn('error updating settings')
+  }
+  if ('err' in res) {
+    console.warn('error updating settings', res.err)
+  }
+
+  if ('ok' in res) {
+    // update form
+    form.value.name = settings.name
+    form.value.status = status
+    form.value.users = settings.users
+  }
+}
 </script>
-@/composables/useGeneralUtils

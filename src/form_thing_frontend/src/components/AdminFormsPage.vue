@@ -42,11 +42,24 @@
             <svg viewBox="0 0 2 2" class="h-0.5 w-0.5 fill-current">
               <circle cx="1" cy="1" r="1" />
             </svg>
-            <p class="truncate">Created by {{ form.owner.toString() }}</p>
+            <p class="truncate">
+              Created by
+              {{
+                form.owner.toString() == authStore.principal?.toString()
+                  ? 'me'
+                  : `${form.owner.toString().substring(0, 3)}...${form.owner
+                      .toString()
+                      .substring(form.owner.toString().length - 3)}`
+              }}
+            </p>
           </div>
         </div>
         <div class="flex flex-none items-center gap-x-4">
-          <Menu as="div" class="relative flex-none">
+          <Menu
+            v-if="form.owner.toString() == authStore.principal?.toString()"
+            as="div"
+            class="relative flex-none"
+          >
             <MenuButton class="-m-2.5 block p-2.5 text-gray-500 hover:text-gray-900">
               <span class="sr-only">Open options</span>
               <EllipsisVerticalIcon class="h-5 w-5" aria-hidden="true" />
@@ -119,6 +132,8 @@ import { PencilSquareIcon } from '@heroicons/vue/24/outline'
 import { useGeneralUtils } from '@/composables/useGeneralUtils'
 import { RouterLink } from 'vue-router'
 
+const authStore = useAuthStore()
+const formStore = useFormStore()
 const { formatDate } = useGeneralUtils()
 
 const statuses = {
@@ -135,7 +150,7 @@ const getStatusClasses = (status: string) => {
   }
 }
 
-const formStore = useFormStore()
+// if no forms, fetch them
 if (!formStore.forms.length) {
   await formStore.fetchFormsByUser()
 } else {
@@ -148,7 +163,7 @@ if (!formStore.forms.length) {
 if (!formStore.forms.length) {
   console.log('creating new form')
   const rand = Math.random().toString(36).substring(4)
-  await useAuthStore().actor?.create_form(`Form Thingy ${rand}`, '')
+  await authStore.actor?.create_form(`Form Thingy ${rand}`, '')
   location.reload()
 }
 </script>
