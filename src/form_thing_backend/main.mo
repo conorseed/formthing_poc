@@ -263,9 +263,162 @@ shared ({ caller = creator }) actor class FormThingActor() {
     return #ok(forms_return);
   };
 
+  // - Update Form Settings
+  let update_form_settings_lock = Map.new<Text, Bool>(thash);
+  public shared ({ caller }) func update_form_settings(form_id : Text, name : Text, status : FormThing.FormStatus, users : [Principal]) : async FormThing.ResultText {
+
+    // Auth - No anonymous calls
+    if (Principal.isAnonymous(caller) == true) {
+      return #err("You must be logged in to use this function");
+    };
+
+    // find form
+    let form_check = Map.find<Text, FormThing.Form>(stable_forms, func(k, v) { k == form_id });
+
+    let form : FormThing.Form = switch (form_check) {
+      // return null if no form found
+      case null {
+        return #err("Form not found");
+      };
+      // return form if found
+      case (?(key, found_form)) {
+        found_form;
+      };
+    };
+
+    // form exists, check if it's locked
+    let form_lock_check = Map.find<Text, Bool>(update_form_settings_lock, func(k, v) { k == form_id });
+
+    switch (form_lock_check) {
+      // return early if form is locked
+      case (?(key, found_form_lock)) {
+        if (found_form_lock == true) {
+          return #err("Form is locked for updates");
+        };
+      };
+      // otherwise lock form
+      case null {
+        ignore Map.put(update_form_settings_lock, thash, form_id, true);
+      };
+    };
+
+    // check if caller is owner
+    if (form.owner != caller) {
+      return #err("You do not have permission to update this form");
+    };
+
+    // if users different, update stable_forms_by_user
+    if (form.users != users) {
+
+      // get the values which are different
+      // create new empty buffer
+      let difference = Buffer.Buffer<(Principal, Text)>(0);
+
+      // find users to delete
+      for (user in form.users.vals()) {
+        let found_user = Array.find<Principal>(users, func(u) { u == user });
+
+        switch (found_user) {
+          // add user to difference if not found
+          case null {
+            difference.add((user, "delete"));
+          };
+          // do nothing if found
+          case (?user) {};
+        };
+      };
+
+      // find users to add
+      for (user in users.vals()) {
+        let found_user = Array.find<Principal>(form.users, func(u) { u == user });
+
+        switch (found_user) {
+          // add user to difference if not found
+          case null {
+            difference.add((user, "add"));
+          };
+          // do nothing if found
+          case (?user) {};
+        };
+      };
+
+      // iterate over difference
+      for (user in difference.vals()) {
+        let user_principal : Principal = user.0;
+        let action : Text = user.1;
+
+        // find form_ids
+        let form_ids_check = Map.find<Principal, [Text]>(stable_forms_by_user, func(k, v) { k == user_principal });
+
+        if (action == "add") {
+          switch (form_ids_check) {
+            // create form_ids if not found
+            case null {
+              let form_ids : [Text] = Array.make(form_id);
+
+              ignore Map.put(stable_forms_by_user, phash, user_principal, form_ids);
+            };
+            // add form_id to form_ids if found
+            case (?(key, found_form_ids)) {
+              let found_form_ids_buffer = Buffer.fromArray<Text>(found_form_ids);
+              found_form_ids_buffer.add(form_id);
+              ignore Map.put(stable_forms_by_user, phash, user_principal, Buffer.toArray<Text>(found_form_ids_buffer));
+            };
+          };
+        };
+
+        if (action == "delete") {
+          switch (form_ids_check) {
+            // do nothing if not found
+            case null {};
+            // remove form_id from form_ids if found
+            case (?(key, found_form_ids)) {
+              let found_form_ids_buffer = Buffer.fromArray<Text>(found_form_ids);
+
+              // get index of form_id
+              let index = Buffer.indexOf<Text>(form_id, found_form_ids_buffer, Text.equal);
+
+              // remove form_id from buffer
+              switch (index) {
+                case null {};
+                case (?index) {
+                  ignore found_form_ids_buffer.remove(index);
+                };
+              };
+              // update stable_forms_by_user
+              ignore Map.put(stable_forms_by_user, phash, user_principal, Buffer.toArray<Text>(found_form_ids_buffer));
+            };
+          };
+        };
+
+      };
+
+    };
+
+    // update form
+    let updated_form : FormThing.Form = {
+      created = form.created;
+      updated = Time.now();
+      id = form.id;
+      name;
+      organisation_id = form.organisation_id;
+      users;
+      owner = form.owner;
+      status;
+      next_entry_id = form.next_entry_id;
+    };
+
+    // save form
+    ignore Map.put(stable_forms, thash, form_id, updated_form);
+
+    // unlock form
+    Map.delete(update_form_settings_lock, thash, form_id);
+
+    #ok("Form updated");
+
+  };
+
   // TO DO:
-  // - Get Forms by Organisation ID
-  // - Update Form Name
   // - Delete Form
 
   /**
@@ -426,7 +579,7 @@ shared ({ caller = creator }) actor class FormThingActor() {
     switch (nonce_check) {
       case null {};
       case (?(key, nonce_check)) {
-        ignore Map.remove(stable_nonces, thash, nonce);
+        Map.delete(stable_nonces, thash, nonce);
       };
     };
 
