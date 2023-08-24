@@ -21,12 +21,12 @@
             <p
               :class="[
                 getStatusClasses(Object.keys(form.status)[0]),
-                'rounded-md whitespace-nowrap mt-0.5 px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset capitalize'
+                'mt-0.5 whitespace-nowrap rounded-md px-1.5 py-0.5 text-xs font-medium capitalize ring-1 ring-inset'
               ]"
             >
               {{ Object.keys(form.status)[0] }}
             </p>
-            <div class="flex w-16 gap-x-2.5 items-center">
+            <div class="flex w-16 items-center gap-x-2.5">
               <div>
                 <span class="sr-only">Total entries</span>
                 <ChatBubbleLeftIcon class="h-4 w-4 text-gray-400" aria-hidden="true" />

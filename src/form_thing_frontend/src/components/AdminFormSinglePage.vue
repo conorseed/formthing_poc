@@ -1,9 +1,9 @@
 <template>
   <div>
-    <div v-if="form" class="grid lg:grid-cols-8 gap-10">
+    <div v-if="form" class="grid gap-10 lg:grid-cols-8">
       <div class="lg:col-span-2">
-        <div class="rounded-lg bg-white shadow p-6 mb-4">
-          <h2 class="text-xl font-bold tracking-tight text-gray-900 mb-6">{{ form.name }}</h2>
+        <div class="mb-4 rounded-lg bg-white p-6 shadow">
+          <h2 class="mb-6 text-xl font-bold tracking-tight text-gray-900">{{ form.name }}</h2>
           <p>ID: {{ form.id }}</p>
           <p>Status: {{ form.status }}</p>
           <p class="truncate">

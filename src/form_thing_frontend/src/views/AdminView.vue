@@ -1,10 +1,10 @@
 <template>
   <PageHeader :title="route.meta.title" />
-  <main class="bg-gray-100 min-h-screen">
+  <main class="min-h-screen bg-gray-100">
     <RouterView
       v-slot="{ Component }"
       :key="route.fullPath"
-      class="mx-auto max-w-7xl px-6 pt-10 pb-24 lg:px-8"
+      class="mx-auto max-w-7xl px-6 pb-24 pt-10 lg:px-8"
     >
       <template v-if="Component">
         <Transition mode="out-in">
@@ -18,7 +18,7 @@
                 <div role="status">
                   <svg
                     aria-hidden="true"
-                    class="inline w-8 h-8 mr-2 text-gray-300 animate-spin dark:text-gray-400 fill-gray-200 dark:fill-indigo-600"
+                    class="mr-2 inline h-8 w-8 animate-spin fill-gray-200 text-gray-300 dark:fill-indigo-600 dark:text-gray-400"
                     viewBox="0 0 100 101"
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"

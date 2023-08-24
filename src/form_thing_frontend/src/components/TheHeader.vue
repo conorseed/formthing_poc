@@ -9,7 +9,7 @@
           Form<span class="text-indigo-400">Thing</span>
         </RouterLink>
       </div>
-      <div v-if="authStore.actor" class="hidden md:flex justify-center">
+      <div v-if="authStore.actor" class="hidden justify-center md:flex">
         <div class="ml-10 flex items-baseline space-x-4">
           <RouterLink
             v-for="item in navigation"
@@ -30,13 +30,13 @@
         <button
           v-if="!authStore.actor"
           @click="login"
-          class="text-sm font-semibold leading-6 text-white px-3 py-2"
+          class="px-3 py-2 text-sm font-semibold leading-6 text-white"
         >
           Log in <span aria-hidden="true">&rarr;</span>
         </button>
         <Popover v-if="authStore.actor" class="relative">
           <PopoverButton
-            class="inline-flex items-center gap-x-1 text-sm font-semibold leading-6 text-white px-3 py-2"
+            class="inline-flex items-center gap-x-1 px-3 py-2 text-sm font-semibold leading-6 text-white"
           >
             <span>Account</span>
             <ChevronDownIcon class="h-5 w-5" aria-hidden="true" />
@@ -60,7 +60,7 @@
                       <button
                         @click="copy(authStore.principal.toString(), $event)"
                         type="button"
-                        class="text-left flex gap-2 group"
+                        class="group flex gap-2 text-left"
                       >
                         <DocumentDuplicateIcon
                           v-if="!copied"
@@ -72,7 +72,7 @@
                     </div>
                     <button
                       @click="logout"
-                      class="text-sm font-semibold leading-6 text-indigo-600 flex-shrink-0"
+                      class="flex-shrink-0 text-sm font-semibold leading-6 text-indigo-600"
                     >
                       Log out <span aria-hidden="true">&rarr;</span>
                     </button>

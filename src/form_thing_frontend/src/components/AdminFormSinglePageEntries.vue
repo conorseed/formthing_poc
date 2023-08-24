@@ -1,10 +1,10 @@
 <template>
   <section>
     <h2
-      class="text-2xl font-bold tracking-tight text-gray-900 mb-6 flex justify-between gap-2 flex-wrap items-end"
+      class="mb-6 flex flex-wrap items-end justify-between gap-2 text-2xl font-bold tracking-tight text-gray-900"
     >
       Entries
-      <span class="text-sm text-gray-500 tracking-normal"
+      <span class="text-sm tracking-normal text-gray-500"
         >Total Entries: {{ props.entries_total }}</span
       >
     </h2>
@@ -16,7 +16,7 @@
       <li
         v-for="entry in entries"
         :key="entry.id"
-        class="col-span-1 divide-y divide-gray-200 rounded-lg bg-white shadow p-6"
+        class="col-span-1 divide-y divide-gray-200 rounded-lg bg-white p-6 shadow"
       >
         <div class="flex justify-between gap-x-4 py-3 text-sm text-gray-500">
           <span>#{{ entry.id }}</span>
@@ -35,28 +35,28 @@
       role="list"
       class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
     >
-      <li class="col-span-1 divide-y divide-gray-200 rounded-lg bg-white shadow p-6">
-        <div class="h-2.5 bg-gray-400 rounded-full mb-4 animate-pulse"></div>
+      <li class="col-span-1 divide-y divide-gray-200 rounded-lg bg-white p-6 shadow">
+        <div class="mb-4 h-2.5 animate-pulse rounded-full bg-gray-400"></div>
         <div class="pt-4">
-          <div class="h-2 bg-gray-400 rounded-full w-40 mb-2.5 animate-pulse"></div>
-          <div class="h-2 bg-gray-400 rounded-full w-32 mb-2.5 animate-pulse"></div>
-          <div class="h-2 bg-gray-400 rounded-full w-44 mb-2.5 animate-pulse"></div>
+          <div class="mb-2.5 h-2 w-40 animate-pulse rounded-full bg-gray-400"></div>
+          <div class="mb-2.5 h-2 w-32 animate-pulse rounded-full bg-gray-400"></div>
+          <div class="mb-2.5 h-2 w-44 animate-pulse rounded-full bg-gray-400"></div>
         </div>
       </li>
-      <li class="col-span-1 divide-y divide-gray-200 rounded-lg bg-white shadow p-6">
-        <div class="h-2.5 bg-gray-400 rounded-full mb-4 animate-pulse"></div>
+      <li class="col-span-1 divide-y divide-gray-200 rounded-lg bg-white p-6 shadow">
+        <div class="mb-4 h-2.5 animate-pulse rounded-full bg-gray-400"></div>
         <div class="pt-4">
-          <div class="h-2 bg-gray-400 rounded-full w-40 mb-2.5 animate-pulse"></div>
-          <div class="h-2 bg-gray-400 rounded-full w-32 mb-2.5 animate-pulse"></div>
-          <div class="h-2 bg-gray-400 rounded-full w-44 mb-2.5 animate-pulse"></div>
+          <div class="mb-2.5 h-2 w-40 animate-pulse rounded-full bg-gray-400"></div>
+          <div class="mb-2.5 h-2 w-32 animate-pulse rounded-full bg-gray-400"></div>
+          <div class="mb-2.5 h-2 w-44 animate-pulse rounded-full bg-gray-400"></div>
         </div>
       </li>
-      <li class="col-span-1 divide-y divide-gray-200 rounded-lg bg-white shadow p-6">
-        <div class="h-2.5 bg-gray-400 rounded-full mb-4 animate-pulse"></div>
+      <li class="col-span-1 divide-y divide-gray-200 rounded-lg bg-white p-6 shadow">
+        <div class="mb-4 h-2.5 animate-pulse rounded-full bg-gray-400"></div>
         <div class="pt-4">
-          <div class="h-2 bg-gray-400 rounded-full w-40 mb-2.5 animate-pulse"></div>
-          <div class="h-2 bg-gray-400 rounded-full w-32 mb-2.5 animate-pulse"></div>
-          <div class="h-2 bg-gray-400 rounded-full w-44 mb-2.5 animate-pulse"></div>
+          <div class="mb-2.5 h-2 w-40 animate-pulse rounded-full bg-gray-400"></div>
+          <div class="mb-2.5 h-2 w-32 animate-pulse rounded-full bg-gray-400"></div>
+          <div class="mb-2.5 h-2 w-44 animate-pulse rounded-full bg-gray-400"></div>
         </div>
       </li>
     </ul>

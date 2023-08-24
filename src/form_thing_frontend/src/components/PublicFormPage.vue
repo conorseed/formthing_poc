@@ -1,6 +1,6 @@
 <template>
   <div>
-    <form @submit="encrypt_and_send" class="flex gap-y-4 flex-col mb-9">
+    <form @submit="encrypt_and_send" class="mb-9 flex flex-col gap-y-4">
       <div>
         <label for="name" class="block text-sm font-medium leading-6 text-gray-900">Name</label>
         <div class="mt-2">
