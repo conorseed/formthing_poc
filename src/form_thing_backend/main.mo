@@ -418,8 +418,75 @@ shared ({ caller = creator }) actor class FormThingActor() {
 
   };
 
-  // TO DO:
   // - Delete Form
+  public shared ({ caller }) func delete_form(form_id : Text) : async FormThing.ResultText {
+
+    // Auth - No anonymous calls
+    if (Principal.isAnonymous(caller) == true) {
+      return #err("You must be logged in to use this function");
+    };
+
+    // find form
+    let form_check = Map.find<Text, FormThing.Form>(stable_forms, func(k, v) { k == form_id });
+
+    let form : FormThing.Form = switch (form_check) {
+      // return null if no form found
+      case null {
+        return #err("Form not found");
+      };
+      // return form if found
+      case (?(key, found_form)) {
+        found_form;
+      };
+    };
+
+    // check if caller is owner
+    if (form.owner != caller) {
+      return #err("You do not have permission to delete this form");
+    };
+
+    // iterate over form.users
+    // remove form_id from stable_forms_by_user
+    label user_loop for (user in form.users.vals()) {
+
+      // find form_ids
+      let form_ids_check = Map.find<Principal, [Text]>(stable_forms_by_user, func(k, v) { k == user });
+
+      let form_ids : [Text] = switch (form_ids_check) {
+        // continue to next user if not found
+        case (null) { continue user_loop };
+        // return form_ids if found
+        case (?(key, found_form_ids)) {
+          found_form_ids;
+        };
+      };
+
+      // setup buffer
+      let form_ids_buffer = Buffer.fromArray<Text>(form_ids);
+
+      // get index of form_id
+      let index = Buffer.indexOf<Text>(form_id, form_ids_buffer, Text.equal);
+
+      // remove form_id from buffer
+      switch (index) {
+        case null {};
+        case (?index) {
+          ignore form_ids_buffer.remove(index);
+        };
+      };
+      // update stable_forms_by_user
+      ignore Map.put(stable_forms_by_user, phash, user, Buffer.toArray<Text>(form_ids_buffer));
+
+    };
+
+    // delete form from stable_forms
+    Map.delete(stable_forms, thash, form_id);
+
+    // delete entries from stable_entries
+    Map.delete(stable_entries, thash, form_id);
+
+    return #ok("Form deleted");
+  };
 
   /**
    * Organisations Functionality
