@@ -77,7 +77,7 @@
               >
                 <MenuItem v-slot="{ active }">
                   <button
-                    @click="openSettingsModal(form as FormReturn)"
+                    @click="updateFormSettingsModal.openModal(form as FormReturn)"
                     type="button"
                     :class="[
                       active ? 'bg-gray-50' : '',
@@ -110,10 +110,10 @@
       </li>
     </ul>
     <AdminFormSettingsModal
-      :form="currentForm"
-      :open="settingsOpen"
-      @close="settingsOpen = false"
-      @updateSettings="onUpdateSettings"
+      :form="updateFormSettingsModal.currentForm.value"
+      :open="updateFormSettingsModal.isOpen.value"
+      @close="updateFormSettingsModal.onClose"
+      @updateSettings="updateFormSettingsModal.onUpdateSettings"
     />
   </div>
   <div v-else class="text-center">
@@ -141,8 +141,7 @@ import { PencilSquareIcon, Cog8ToothIcon } from '@heroicons/vue/24/outline'
 import { useGeneralUtils } from '@/composables/useGeneralUtils'
 import { RouterLink } from 'vue-router'
 import type { FormReturn } from '@root/declarations/form_thing_backend/form_thing_backend.did'
-import { ref, watch } from 'vue'
-import type { Principal } from '@dfinity/principal'
+import { useUpdateFormSettingsModal } from '@/composables/useUpdateFormSettingsModal'
 
 const authStore = useAuthStore()
 const formStore = useFormStore()
@@ -179,33 +178,6 @@ if (!formStore.forms.length) {
   location.reload()
 }
 
-// setup settings modal
-const settingsOpen = ref(false)
-const openSettingsModal = (form: FormReturn) => {
-  currentForm.value = form
-  settingsOpen.value = true
-}
-
-// setup currentForm
-const currentForm = ref<FormReturn | null>(null)
-watch(
-  () => formStore.forms,
-  (forms) => {
-    if (!forms.length) return
-    currentForm.value = forms[0]
-  }
-)
-
-// on settings update
-const onUpdateSettings = async (
-  settings: {
-    name: string
-    status: 'active' | 'inactive'
-    users: Principal[]
-  }
-) => {
-  console.log('setting update', settings)
-  if (!currentForm.value) return
-  await formStore.updateFormSettings(currentForm.value.id, settings)
-}
+// Modal setup
+const updateFormSettingsModal = useUpdateFormSettingsModal()
 </script>

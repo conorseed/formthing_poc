@@ -15,7 +15,7 @@
         <div class="flex flex-wrap gap-2">
           <button
             v-if="form.owner.toString() == authStore.principal?.toString()"
-            @click="openSettingsModal"
+            @click="updateFormSettingsModal.openModal(form as FormReturn)"
             type="button"
             class="inline-flex items-center rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
           >
@@ -37,10 +37,10 @@
           </button>
 
           <AdminFormSettingsModal
-            :form="form"
-            :open="settingsOpen"
-            @close="settingsOpen = false"
-            @updateSettings="onUpdateSettings"
+            :form="updateFormSettingsModal.currentForm.value"
+            :open="updateFormSettingsModal.isOpen.value"
+            @close="updateFormSettingsModal.onClose"
+            @updateSettings="updateFormSettingsModal.onUpdateSettings"
           />
         </div>
       </div>
@@ -77,7 +77,7 @@ import { useRoute } from 'vue-router'
 import { type FormReturn } from '@root/declarations/form_thing_backend/form_thing_backend.did'
 import { ref } from 'vue'
 import { DocumentDuplicateIcon, CheckIcon, Cog8ToothIcon } from '@heroicons/vue/24/outline'
-import type { Principal } from '@dfinity/principal'
+import { useUpdateFormSettingsModal } from '@/composables/useUpdateFormSettingsModal'
 
 const route = useRoute()
 const formStore = useFormStore()
@@ -108,22 +108,6 @@ const copyLink = (e: Event) => {
   }, 2000)
 }
 
-// setup settings modal
-const settingsOpen = ref(false)
-const openSettingsModal = () => {
-  settingsOpen.value = true
-}
-
-// on settings update
-const onUpdateSettings = async (
-  settings: {
-    name: string
-    status: 'active' | 'inactive'
-    users: Principal[]
-  }
-) => {
-  console.log('setting update', settings)
-  if (!form.value) return
-  await formStore.updateFormSettings(form.value.id, settings)
-}
+// Modal setup
+const updateFormSettingsModal = useUpdateFormSettingsModal()
 </script>
