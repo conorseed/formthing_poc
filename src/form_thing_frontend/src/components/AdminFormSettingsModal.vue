@@ -153,7 +153,7 @@ import { Principal } from '@dfinity/principal'
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
 import { Cog8ToothIcon, XMarkIcon } from '@heroicons/vue/24/outline'
 import type { FormReturn } from '@root/declarations/form_thing_backend/form_thing_backend.did'
-import { computed, ref } from 'vue'
+import { computed, ref, toRaw } from 'vue'
 
 const props = defineProps<{
   open: boolean
@@ -225,9 +225,9 @@ const emitUpdateSettings = () => {
 const resetSettingsUpdate = () => {
   let status = Object.keys(props.form.status)[0]
   settingsUpdate.value = {
-    name: JSON.parse(JSON.stringify(props.form.name)),
+    name: toRaw(props.form.name),
     status: status === 'active' ? 'active' : 'inactive',
-    users: JSON.parse(JSON.stringify(props.form.users))
+    users: toRaw(props.form.users)
   }
 }
 </script>

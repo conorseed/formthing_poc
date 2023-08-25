@@ -36,7 +36,7 @@
             Copy Form Link
           </button>
 
-          <AdminFormSinglePageSettingsModal
+          <AdminFormSettingsModal
             :form="form"
             :open="settingsOpen"
             @close="settingsOpen = false"
@@ -74,10 +74,7 @@ import { useGeneralUtils } from '@/composables/useGeneralUtils'
 import { useFormStore } from '@/stores/formStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useRoute } from 'vue-router'
-import {
-  type FormReturn,
-  type FormStatus
-} from '@root/declarations/form_thing_backend/form_thing_backend.did'
+import { type FormReturn } from '@root/declarations/form_thing_backend/form_thing_backend.did'
 import { ref } from 'vue'
 import { DocumentDuplicateIcon, CheckIcon, Cog8ToothIcon } from '@heroicons/vue/24/outline'
 import type { Principal } from '@dfinity/principal'
@@ -126,41 +123,7 @@ const onUpdateSettings = async (
   }
 ) => {
   console.log('setting update', settings)
-  // check if form exists
-  if (!form.value) {
-    console.log('no form to update')
-    return
-  }
-
-  // check if actor
-  if (!authStore.actor) {
-    console.log('no actor')
-    return
-  }
-
-  // make sure status is valid
-  const status = { [settings.status]: null } as FormStatus
-
-  const res = await authStore.actor.update_form_settings(
-    form.value.id,
-    settings.name,
-    status,
-    settings.users
-  )
-  console.log('update settings res', res)
-
-  if (!res) {
-    console.warn('error updating settings')
-  }
-  if ('err' in res) {
-    console.warn('error updating settings', res.err)
-  }
-
-  if ('ok' in res) {
-    // update form
-    form.value.name = settings.name
-    form.value.status = status
-    form.value.users = settings.users
-  }
+  if (!form.value) return
+  await formStore.updateFormSettings(form.value.id, settings)
 }
 </script>

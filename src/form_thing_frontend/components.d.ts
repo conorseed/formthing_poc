@@ -7,11 +7,13 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
+    AdminFormSettingsModal: typeof import('./src/components/AdminFormSettingsModal.vue')['default']
     AdminFormSinglePage: typeof import('./src/components/AdminFormSinglePage.vue')['default']
     AdminFormSinglePageEntries: typeof import('./src/components/AdminFormSinglePageEntries.vue')['default']
     AdminFormSinglePageSettingsModal: typeof import('./src/components/AdminFormSinglePageSettingsModal.vue')['default']
     AdminFormSinglePageUpdateForm: typeof import('./src/components/AdminFormSinglePageUpdateForm.vue')['default']
     AdminFormsPage: typeof import('./src/components/AdminFormsPage.vue')['default']
+    AdminFormUpdateSettings: typeof import('./src/components/AdminFormUpdateSettings.vue')['default']
     copy: typeof import('./src/components/FormsPage copy.vue')['default']
     FormsPage: typeof import('./src/components/FormsPage.vue')['default']
     HomePage: typeof import('./src/components/HomePage.vue')['default']

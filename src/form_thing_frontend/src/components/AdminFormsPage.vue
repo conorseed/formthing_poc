@@ -76,14 +76,17 @@
                 class="absolute right-0 z-10 mt-2 w-32 origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-gray-900/5 focus:outline-none"
               >
                 <MenuItem v-slot="{ active }">
-                  <a
-                    href="#"
+                  <button
+                    @click="openSettingsModal(form as FormReturn)"
+                    type="button"
                     :class="[
                       active ? 'bg-gray-50' : '',
-                      'block px-3 py-1 text-sm leading-6 text-gray-900'
+                      'flex w-full items-center px-3 py-1 text-left text-sm leading-6 text-gray-900'
                     ]"
-                    >Edit<span class="sr-only">, {{ form.name }}</span></a
                   >
+                    <Cog8ToothIcon class="-ml-0.5 mr-1.5 h-5 w-5" aria-hidden="true" />
+                    Settings<span class="sr-only">, {{ form.name }}</span>
+                  </button>
                 </MenuItem>
                 <MenuItem v-slot="{ active }">
                   <a
@@ -106,6 +109,12 @@
         </div>
       </li>
     </ul>
+    <AdminFormSettingsModal
+      :form="currentForm"
+      :open="settingsOpen"
+      @close="settingsOpen = false"
+      @updateSettings="onUpdateSettings"
+    />
   </div>
   <div v-else class="text-center">
     <PencilSquareIcon class="mx-auto h-12 w-12 text-gray-400" aria-hidden="true" />
@@ -128,9 +137,12 @@ import { useFormStore } from '@/stores/formStore'
 import { useAuthStore } from '@/stores/authStore'
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
 import { EllipsisVerticalIcon, ChatBubbleLeftIcon, PlusIcon } from '@heroicons/vue/20/solid'
-import { PencilSquareIcon } from '@heroicons/vue/24/outline'
+import { PencilSquareIcon, Cog8ToothIcon } from '@heroicons/vue/24/outline'
 import { useGeneralUtils } from '@/composables/useGeneralUtils'
 import { RouterLink } from 'vue-router'
+import type { FormReturn } from '@root/declarations/form_thing_backend/form_thing_backend.did'
+import { ref, watch } from 'vue'
+import type { Principal } from '@dfinity/principal'
 
 const authStore = useAuthStore()
 const formStore = useFormStore()
@@ -165,5 +177,35 @@ if (!formStore.forms.length) {
   const rand = Math.random().toString(36).substring(4)
   await authStore.actor?.create_form(`Form Thingy ${rand}`, '')
   location.reload()
+}
+
+// setup settings modal
+const settingsOpen = ref(false)
+const openSettingsModal = (form: FormReturn) => {
+  currentForm.value = form
+  settingsOpen.value = true
+}
+
+// setup currentForm
+const currentForm = ref<FormReturn | null>(null)
+watch(
+  () => formStore.forms,
+  (forms) => {
+    if (!forms.length) return
+    currentForm.value = forms[0]
+  }
+)
+
+// on settings update
+const onUpdateSettings = async (
+  settings: {
+    name: string
+    status: 'active' | 'inactive'
+    users: Principal[]
+  }
+) => {
+  console.log('setting update', settings)
+  if (!currentForm.value) return
+  await formStore.updateFormSettings(currentForm.value.id, settings)
 }
 </script>
