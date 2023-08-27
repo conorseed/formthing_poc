@@ -89,14 +89,17 @@
                   </button>
                 </MenuItem>
                 <MenuItem v-slot="{ active }">
-                  <a
-                    href="#"
+                  <button
+                    @click="formDeleteModal.openModal(form as FormReturn)"
+                    type="button"
                     :class="[
                       active ? 'bg-gray-50' : '',
-                      'block px-3 py-1 text-sm leading-6 text-gray-900'
+                      'flex w-full items-center px-3 py-1 text-sm leading-6 text-gray-900'
                     ]"
-                    >Delete<span class="sr-only">, {{ form.name }}</span></a
                   >
+                    <ExclamationTriangleIcon class="-ml-0.5 mr-1.5 h-5 w-5" aria-hidden="true" />
+                    Delete<span class="sr-only">, {{ form.name }}</span>
+                  </button>
                 </MenuItem>
               </MenuItems>
             </transition>
@@ -114,6 +117,12 @@
       :open="updateFormSettingsModal.isOpen.value"
       @close="updateFormSettingsModal.onClose"
       @updateSettings="updateFormSettingsModal.onUpdateSettings"
+    />
+    <AdminFormDeleteModal
+      :form="formDeleteModal.currentForm.value"
+      :open="formDeleteModal.isOpen.value"
+      @close="formDeleteModal.onClose"
+      @confirmed="formDeleteModal.onConfirmed"
     />
   </div>
   <div v-else class="text-center">
@@ -137,11 +146,12 @@ import { useFormStore } from '@/stores/formStore'
 import { useAuthStore } from '@/stores/authStore'
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
 import { EllipsisVerticalIcon, ChatBubbleLeftIcon, PlusIcon } from '@heroicons/vue/20/solid'
-import { PencilSquareIcon, Cog8ToothIcon } from '@heroicons/vue/24/outline'
+import { PencilSquareIcon, Cog8ToothIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/outline'
 import { useGeneralUtils } from '@/composables/useGeneralUtils'
 import { RouterLink } from 'vue-router'
 import type { FormReturn } from '@root/declarations/form_thing_backend/form_thing_backend.did'
 import { useUpdateFormSettingsModal } from '@/composables/useUpdateFormSettingsModal'
+import { useFormDeleteModal } from '@/composables/useFormDeleteModal'
 
 const authStore = useAuthStore()
 const formStore = useFormStore()
@@ -180,4 +190,5 @@ if (!formStore.forms.length) {
 
 // Modal setup
 const updateFormSettingsModal = useUpdateFormSettingsModal()
+const formDeleteModal = useFormDeleteModal()
 </script>

@@ -7,6 +7,7 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
+    AdminFormDeleteModal: typeof import('./src/components/AdminFormDeleteModal.vue')['default']
     AdminFormSettingsModal: typeof import('./src/components/AdminFormSettingsModal.vue')['default']
     AdminFormSinglePage: typeof import('./src/components/AdminFormSinglePage.vue')['default']
     AdminFormSinglePageEntries: typeof import('./src/components/AdminFormSinglePageEntries.vue')['default']

@@ -77,9 +77,11 @@ export const useFormStore = defineStore('form', () => {
 
     if (!res) {
       console.warn('error updating settings')
+      return
     }
     if ('err' in res) {
       console.warn('error updating settings', res.err)
+      return
     }
 
     if ('ok' in res) {
@@ -90,5 +92,30 @@ export const useFormStore = defineStore('form', () => {
     }
   }
 
-  return { fetchFormsByUser, getFormById, updateFormSettings, forms }
+  // delete form
+  const deleteForm = async (form: FormReturn) => {
+    // check if actor
+    if (!authStore.actor) {
+      console.log('no actor')
+      return
+    }
+    // delete the form
+    const res = await authStore.actor.delete_form(form.id)
+
+    if (!res) {
+      console.warn('error deleting form')
+      return
+    }
+    if ('err' in res) {
+      console.warn('error deleting form', res.err)
+      return
+    }
+
+    if ('ok' in res) {
+      // update forms array
+      forms.value = forms.value.filter((f) => f.id !== form.id)
+    }
+  }
+
+  return { fetchFormsByUser, getFormById, deleteForm, updateFormSettings, forms }
 })

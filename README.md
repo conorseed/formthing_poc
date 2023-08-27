@@ -7,3 +7,11 @@ dfx canister create vetkd_system_api --specified-id s55qq-oqaaa-aaaaa-aaakq-cai
 dfx generate
 dfx deploy
 npm run frontend
+
+TO DO:
+
+- Create Form
+- Notifications / Graceful Fails
+- Public Forms
+- Input/Output Sanitsation
+- Nonce

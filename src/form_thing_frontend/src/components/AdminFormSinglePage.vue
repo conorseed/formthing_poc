@@ -36,11 +36,27 @@
             Copy Form Link
           </button>
 
+          <button
+            v-if="form.owner.toString() == authStore.principal?.toString()"
+            @click="formDeleteModal.openModal(form as FormReturn)"
+            type="button"
+            class="inline-flex items-center rounded-md bg-red-100 px-2.5 py-1.5 text-sm font-semibold text-red-600 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+          >
+            <ExclamationTriangleIcon class="-ml-0.5 mr-1.5 h-5 w-5" aria-hidden="true" />
+            Delete Form
+          </button>
+
           <AdminFormSettingsModal
             :form="updateFormSettingsModal.currentForm.value"
             :open="updateFormSettingsModal.isOpen.value"
             @close="updateFormSettingsModal.onClose"
             @updateSettings="updateFormSettingsModal.onUpdateSettings"
+          />
+          <AdminFormDeleteModal
+            :form="formDeleteModal.currentForm.value"
+            :open="formDeleteModal.isOpen.value"
+            @close="formDeleteModal.onClose"
+            @confirmed="formDeleteModal.onConfirmed(onConfirmedCallback)"
           />
         </div>
       </div>
@@ -73,12 +89,19 @@
 import { useGeneralUtils } from '@/composables/useGeneralUtils'
 import { useFormStore } from '@/stores/formStore'
 import { useAuthStore } from '@/stores/authStore'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { type FormReturn } from '@root/declarations/form_thing_backend/form_thing_backend.did'
 import { ref } from 'vue'
-import { DocumentDuplicateIcon, CheckIcon, Cog8ToothIcon } from '@heroicons/vue/24/outline'
+import {
+  DocumentDuplicateIcon,
+  CheckIcon,
+  Cog8ToothIcon,
+  ExclamationTriangleIcon
+} from '@heroicons/vue/24/outline'
 import { useUpdateFormSettingsModal } from '@/composables/useUpdateFormSettingsModal'
+import { useFormDeleteModal } from '@/composables/useFormDeleteModal'
 
+const router = useRouter()
 const route = useRoute()
 const formStore = useFormStore()
 const authStore = useAuthStore()
@@ -110,4 +133,10 @@ const copyLink = (e: Event) => {
 
 // Modal setup
 const updateFormSettingsModal = useUpdateFormSettingsModal()
+const formDeleteModal = useFormDeleteModal()
+
+// delete modal onConfirmed callback
+const onConfirmedCallback = () => {
+  router.push({ name: 'admin' })
+}
 </script>
