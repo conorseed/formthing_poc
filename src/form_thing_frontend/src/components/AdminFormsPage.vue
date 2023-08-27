@@ -112,13 +112,13 @@
         </div>
       </li>
     </ul>
-    <AdminFormSettingsModal
+    <AdminModalFormSettings
       :form="updateFormSettingsModal.currentForm.value"
       :open="updateFormSettingsModal.isOpen.value"
       @close="updateFormSettingsModal.onClose"
       @updateSettings="updateFormSettingsModal.onUpdateSettings"
     />
-    <AdminFormDeleteModal
+    <AdminModalFormDelete
       :form="formDeleteModal.currentForm.value"
       :open="formDeleteModal.isOpen.value"
       @close="formDeleteModal.onClose"
