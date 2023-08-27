@@ -10,7 +10,7 @@
         </RouterLink>
       </div>
       <div v-if="authStore.actor" class="hidden justify-center md:flex">
-        <div class="ml-10 flex items-baseline space-x-4">
+        <div class="ml-10 flex items-center space-x-4">
           <RouterLink
             v-for="item in navigation"
             :key="item.name"
@@ -19,10 +19,17 @@
               router.currentRoute.value.name == item.to.name
                 ? 'text-white underline underline-offset-8'
                 : 'text-gray-400 hover:text-white hover:underline hover:underline-offset-8',
-              'rounded-md px-3 py-2 text-sm font-medium transition-all'
+              'group flex gap-2 rounded-md px-3 py-2 text-sm font-medium transition-all'
             ]"
             :aria-current="router.currentRoute.value.name == item.to.name ? 'page' : undefined"
-            >{{ item.name }}</RouterLink
+          >
+            <component
+              v-if="item.icon"
+              :is="item.icon"
+              class="h-5 w-5 flex-none"
+              aria-hidden="true"
+            />
+            {{ item.name }}</RouterLink
           >
         </div>
       </div>
@@ -90,8 +97,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { Popover, PopoverButton, PopoverPanel } from '@headlessui/vue'
-import { ChevronDownIcon } from '@heroicons/vue/20/solid'
-import { PencilSquareIcon, DocumentDuplicateIcon, CheckIcon } from '@heroicons/vue/24/outline'
+import { ChevronDownIcon, PlusIcon } from '@heroicons/vue/20/solid'
+import { DocumentDuplicateIcon, CheckIcon } from '@heroicons/vue/24/outline'
 import { useAuthStore } from '@/stores/authStore'
 import { useRouter } from 'vue-router'
 
@@ -101,9 +108,13 @@ const authStore = useAuthStore()
 const navigation = [
   {
     name: 'Forms',
-    description: 'View all forms you have access to',
     to: { name: 'admin' },
-    icon: PencilSquareIcon
+    icon: null
+  },
+  {
+    name: 'Create Form',
+    to: { name: 'adminFormCreate' },
+    icon: PlusIcon
   }
 ]
 

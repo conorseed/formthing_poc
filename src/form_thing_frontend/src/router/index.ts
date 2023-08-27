@@ -38,6 +38,12 @@ const router = createRouter({
           name: 'adminFormSingle',
           component: () => import('@/components/AdminFormSinglePage.vue'),
           meta: { requiresAuth: true, title: 'Form Details' }
+        },
+        {
+          path: 'form/create',
+          name: 'adminFormCreate',
+          component: () => import('@/components/AdminCreateFormPage.vue'),
+          meta: { requiresAuth: true, title: 'Create Form' }
         }
       ]
     },

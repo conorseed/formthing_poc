@@ -1,13 +1,13 @@
 <template>
   <div v-if="formStore.forms.length">
     <div class="flex justify-end">
-      <button
-        type="button"
+      <RouterLink
+        :to="{ name: 'adminFormCreate' }"
         class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
       >
         <PlusIcon class="-ml-0.5 mr-1.5 h-5 w-5" aria-hidden="true" />
         New form
-      </button>
+      </RouterLink>
     </div>
     <ul role="list" class="divide-y divide-gray-200">
       <li
@@ -130,13 +130,13 @@
     <h3 class="mt-2 text-sm font-semibold text-gray-900">No forms</h3>
     <p class="mt-1 text-sm text-gray-500">Get started by creating a new form.</p>
     <div class="mt-6">
-      <button
-        type="button"
+      <RouterLink
+        :to="{ name: 'adminFormCreate' }"
         class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
       >
         <PlusIcon class="-ml-0.5 mr-1.5 h-5 w-5" aria-hidden="true" />
         New form
-      </button>
+      </RouterLink>
     </div>
   </div>
 </template>
@@ -178,14 +178,6 @@ if (!formStore.forms.length) {
   // fetch in background to update
   console.log('fetching forms in background')
   formStore.fetchFormsByUser()
-}
-
-// else create the form and refresh the page
-if (!formStore.forms.length) {
-  console.log('creating new form')
-  const rand = Math.random().toString(36).substring(4)
-  await authStore.actor?.create_form(`Form Thingy ${rand}`, '')
-  location.reload()
 }
 
 // Modal setup

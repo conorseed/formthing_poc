@@ -35,8 +35,26 @@ export const useFormStore = defineStore('form', () => {
       const res = await fetchFormsByUser()
       if (!res.length) return undefined
     }
-    // get the form
-    const form = forms.value.find((f) => f.id === formId) as FormReturn
+    // get the form from store
+    let form = forms.value.find((f) => f.id === formId) as FormReturn
+
+    // if no form, get by ID
+    if (!form) {
+      const res = await authStore.actor?.get_form_by_id(formId)
+      if (!res) {
+        console.warn('error getting form')
+        return
+      }
+      if ('err' in res) {
+        console.warn('error getting form', res.err)
+        return
+      }
+      if ('ok' in res) {
+        // add form to forms
+        forms.value.push(res.ok)
+        form = res.ok
+      }
+    }
     // return the form
     return form
   }
@@ -117,5 +135,37 @@ export const useFormStore = defineStore('form', () => {
     }
   }
 
-  return { fetchFormsByUser, getFormById, deleteForm, updateFormSettings, forms }
+  // create form
+  const createForm = async (
+    newForm: {
+      name: string
+      status: 'active' | 'inactive'
+      users: Principal[]
+    }
+  ) => {
+    // check if name
+    if (!newForm.name) {
+      console.warn('no name')
+      return
+    }
+    const res = await authStore.actor?.create_form(
+      newForm.name,
+      { [newForm.status]: null } as FormStatus,
+      newForm.users,
+      ''
+    )
+
+    if (!res) {
+      console.warn('error deleting form')
+      return
+    }
+    if ('err' in res) {
+      console.warn('error deleting form', res.err)
+      return
+    }
+    forms.value.push(res.ok)
+    return res.ok
+  }
+
+  return { fetchFormsByUser, getFormById, deleteForm, createForm, updateFormSettings, forms }
 })
