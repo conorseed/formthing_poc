@@ -8,10 +8,10 @@ import Principal "mo:base/Principal";
 import Result "mo:base/Result";
 import Text "mo:base/Text";
 import Time "mo:base/Time";
+import Map "mo:motoko-hash-map/Map";
 
 import FormThing "helpers";
 import Hex "vendor/Hex";
-import Map "vendor/map/Map";
 
 shared ({ caller = creator }) actor class FormThingActor() {
 

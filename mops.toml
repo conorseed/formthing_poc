@@ -1,0 +1,3 @@
+[dependencies]
+base = "0.9.3"
+motoko-hash-map = "https://github.com/ZhenyaUsenko/motoko-hash-map#v8.1.0"

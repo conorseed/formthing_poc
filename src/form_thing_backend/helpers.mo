@@ -6,10 +6,7 @@ import Int "mo:base/Int";
 import Principal "mo:base/Principal";
 import Result "mo:base/Result";
 import Text "mo:base/Text";
-
-import Map "vendor/map/Map";
-// import Source "vendor/uuid/async/SourceV4";
-// import UUID "vendor/uuid/UUID";
+import Map "mo:motoko-hash-map/Map";
 
 module FormThingHelpers {
 
