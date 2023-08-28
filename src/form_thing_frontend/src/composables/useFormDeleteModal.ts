@@ -1,8 +1,10 @@
 import { useFormStore } from '@/stores/formStore'
+import { useNotificationStore } from '@/stores/useNotificationStore'
 import type { FormReturn } from '@root/declarations/form_thing_backend/form_thing_backend.did'
 import { ref } from 'vue'
 
 const formStore = useFormStore()
+const notificationStore = useNotificationStore()
 
 export function useFormDeleteModal() {
   // Setup vars
@@ -22,9 +24,37 @@ export function useFormDeleteModal() {
 
   // on settings update
   const onConfirmed = async (callback?: Function) => {
-    if (!currentForm.value) return
-    await formStore.deleteForm(currentForm.value as FormReturn)
-    if (callback) callback()
+    // create notification so user knows something is happening
+    const nid = notificationStore.addNotification({
+      title: 'Deleting form',
+      message: 'Please wait...',
+      status: 'loading'
+    })
+
+    try {
+      // check if form is selected
+      if (!currentForm.value) throw new Error('No form selected')
+
+      // delete form
+      const form_id = currentForm.value.id
+      await formStore.deleteForm(currentForm.value as FormReturn)
+
+      // update notification
+      notificationStore.updateNotification(nid, {
+        title: 'Form deleted',
+        message: `Form (${form_id}) deleted`,
+        status: 'success'
+      })
+
+      // callback
+      if (callback) callback()
+    } catch (e: any) {
+      notificationStore.updateNotification(nid, {
+        title: 'Error deleting form',
+        message: e.message,
+        status: 'error'
+      })
+    }
   }
 
   return { isOpen, currentForm, openModal, onClose, onConfirmed }

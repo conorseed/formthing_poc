@@ -27,6 +27,12 @@ export const useFormStore = defineStore('form', () => {
     if (res && 'ok' in res) {
       forms.value = res.ok
     }
+    if (res && 'err' in res) {
+      throw new Error(res.err)
+    }
+    if (!res) {
+      throw new Error('No response from server')
+    }
 
     return forms.value
   }
@@ -45,12 +51,10 @@ export const useFormStore = defineStore('form', () => {
     if (!form) {
       const res = await authStore.actor?.get_form_by_id(formId)
       if (!res) {
-        console.warn('error getting form')
-        return
+        throw new Error('No response from server')
       }
       if ('err' in res) {
-        console.warn('error getting form', res.err)
-        return
+        throw new Error(res.err)
       }
       if ('ok' in res) {
         // add form to forms
@@ -71,38 +75,28 @@ export const useFormStore = defineStore('form', () => {
       users: Principal[]
     }
   ) => {
-    // check if actor
-    if (!authStore.actor) {
-      console.log('no actor')
-      return
-    }
-
     // get the form
     const form = await getFormById(form_id)
 
     // check if form
-    if (!form) return
+    if (!form) throw new Error('No form found')
 
     // make sure status is valid
     const status = { [settings.status]: null } as FormStatus
 
-    console.log('update settings', form.id, settings.name, status, settings.users as Principal[])
-
-    const res = await authStore.actor.update_form_settings(
+    // update the form
+    const res = await authStore.actor?.update_form_settings(
       form.id,
       sanitizeHTML(settings.name),
       status,
       settings.users as Principal[]
     )
-    console.log('update settings res', res)
 
     if (!res) {
-      console.warn('error updating settings')
-      return
+      throw new Error('No response from server')
     }
     if ('err' in res) {
-      console.warn('error updating settings', res.err)
-      return
+      throw new Error(res.err)
     }
 
     if ('ok' in res) {
@@ -115,21 +109,14 @@ export const useFormStore = defineStore('form', () => {
 
   // delete form
   const deleteForm = async (form: FormReturn) => {
-    // check if actor
-    if (!authStore.actor) {
-      console.log('no actor')
-      return
-    }
     // delete the form
-    const res = await authStore.actor.delete_form(form.id)
+    const res = await authStore.actor?.delete_form(form.id)
 
     if (!res) {
-      console.warn('error deleting form')
-      return
+      throw new Error('No response from server')
     }
     if ('err' in res) {
-      console.warn('error deleting form', res.err)
-      return
+      throw new Error(res.err)
     }
 
     if ('ok' in res) {
@@ -148,8 +135,7 @@ export const useFormStore = defineStore('form', () => {
   ) => {
     // check if name
     if (!newForm.name) {
-      console.warn('no name')
-      return
+      throw new Error('No name provided for form')
     }
     const res = await authStore.actor?.create_form(
       sanitizeHTML(newForm.name),
@@ -159,16 +145,21 @@ export const useFormStore = defineStore('form', () => {
     )
 
     if (!res) {
-      console.warn('error deleting form')
-      return
+      throw new Error('No response from server')
     }
     if ('err' in res) {
-      console.warn('error deleting form', res.err)
-      return
+      throw new Error(res.err)
     }
-    forms.value.push(res.ok)
+    // push to beginning of forms
+    forms.value.unshift(res.ok)
+
     return res.ok
   }
 
-  return { fetchFormsByUser, getFormById, deleteForm, createForm, updateFormSettings, forms }
+  // clear the store
+  const clear = () => {
+    forms.value = []
+  }
+
+  return { fetchFormsByUser, getFormById, deleteForm, createForm, updateFormSettings, clear, forms }
 })

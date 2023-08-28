@@ -100,10 +100,12 @@ import { Popover, PopoverButton, PopoverPanel } from '@headlessui/vue'
 import { ChevronDownIcon, PlusIcon } from '@heroicons/vue/20/solid'
 import { DocumentDuplicateIcon, CheckIcon } from '@heroicons/vue/24/outline'
 import { useAuthStore } from '@/stores/authStore'
+import { useNotificationStore } from '@/stores/useNotificationStore'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const notificationStore = useNotificationStore()
 
 const navigation = [
   {
@@ -130,16 +132,48 @@ const copy = (input: string, e: Event) => {
 
 const login = async (e: Event) => {
   e.preventDefault()
-  await authStore.login()
-  if (await authStore.isAuthenticated()) {
-    router.push({ name: 'admin' })
+
+  try {
+    await authStore.login()
+    if (await authStore.isAuthenticated()) {
+      // add notification to the user
+      notificationStore.addNotification({
+        title: 'Login Success!',
+        message: 'You are now logged in',
+        status: 'success'
+      })
+      // redirect to admin page
+      router.push({ name: 'admin' })
+    }
+  } catch (e: any) {
+    // add notification to the user
+    notificationStore.addNotification({
+      title: 'Login Failed',
+      message: e.message,
+      status: 'error'
+    })
   }
 }
 
 const logout = async (e: Event) => {
   e.preventDefault()
-  await authStore.logout()
-  router.push({ name: 'home' })
+  try {
+    await authStore.logout()
+    // add notification to the user
+    notificationStore.addNotification({
+      title: 'You have Logged Out',
+      message: 'See you again soon!',
+      status: 'success'
+    })
+    // redirect home
+    router.push({ name: 'home' })
+  } catch (e: any) {
+    // add notification to the user
+    notificationStore.addNotification({
+      title: 'Logout Failed',
+      message: e.message,
+      status: 'error'
+    })
+  }
 }
 </script>
-@/stores/authStore

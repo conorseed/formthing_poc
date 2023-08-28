@@ -16,6 +16,8 @@ declare module 'vue' {
     AdminFormUpdateSettings: (typeof import('./src/components/AdminFormUpdateSettings.vue'))['default']
     AdminModalFormDelete: typeof import('./src/components/AdminModalFormDelete.vue')['default']
     AdminModalFormSettings: typeof import('./src/components/AdminModalFormSettings.vue')['default']
+    AdminNotification: typeof import('./src/components/AdminNotification.vue')['default']
+    AdminNotifications: typeof import('./src/components/AdminNotifications.vue')['default']
     copy: (typeof import('./src/components/FormsPage copy.vue'))['default']
     FormsPage: (typeof import('./src/components/FormsPage.vue'))['default']
     HomePage: typeof import('./src/components/HomePage.vue')['default']
@@ -26,5 +28,6 @@ declare module 'vue' {
     RouterView: typeof import('vue-router')['RouterView']
     TestPage: typeof import('./src/components/TestPage.vue')['default']
     TheHeader: typeof import('./src/components/TheHeader.vue')['default']
+    TheNotifications: typeof import('./src/components/TheNotifications.vue')['default']
   }
 }

@@ -42,6 +42,7 @@
       </template>
     </RouterView>
   </main>
+  <TheNotifications />
 </template>
 
 <script setup lang="ts">

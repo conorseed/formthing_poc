@@ -1,9 +1,11 @@
 import { useFormStore } from '@/stores/formStore'
+import { useNotificationStore } from '@/stores/useNotificationStore'
 import type { Principal } from '@dfinity/principal'
 import type { FormReturn } from '@root/declarations/form_thing_backend/form_thing_backend.did'
 import { ref } from 'vue'
 
 const formStore = useFormStore()
+const notificationStore = useNotificationStore()
 
 export function useUpdateFormSettingsModal() {
   // Setup vars
@@ -29,9 +31,34 @@ export function useUpdateFormSettingsModal() {
       users: Principal[]
     }
   ) => {
-    console.log('setting update', settings)
-    if (!currentForm.value) return
-    await formStore.updateFormSettings(currentForm.value.id, settings)
+    // setup notification so user knows something is happening
+    const nid = notificationStore.addNotification({
+      title: 'Updating form settings',
+      message: 'Please wait...',
+      status: 'loading'
+    })
+
+    try {
+      // check if form is selected
+      if (!currentForm.value) throw new Error('No form selected')
+
+      // update form settings
+      const form_id = currentForm.value.id
+      await formStore.updateFormSettings(form_id, settings)
+
+      // update notification
+      notificationStore.updateNotification(nid, {
+        title: 'Settings updated',
+        message: `Settings for form (${form_id}) updated`,
+        status: 'success'
+      })
+    } catch (e: any) {
+      notificationStore.updateNotification(nid, {
+        title: 'Error updating settings',
+        message: e.message,
+        status: 'error'
+      })
+    }
   }
 
   return { isOpen, currentForm, openModal, onClose, onUpdateSettings }

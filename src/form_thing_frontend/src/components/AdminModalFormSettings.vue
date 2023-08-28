@@ -150,6 +150,7 @@
 </template>
 
 <script setup lang="ts">
+import { useNotificationStore } from '@/stores/useNotificationStore'
 import { Principal } from '@dfinity/principal'
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
 import { Cog8ToothIcon, XMarkIcon } from '@heroicons/vue/24/outline'
@@ -162,6 +163,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits(['close', 'updateSettings'])
+const notificationStore = useNotificationStore()
 
 type Settings = {
   name: string
@@ -203,9 +205,18 @@ const settingsUpdated = computed(() => {
 // add new user
 const newUser = ref('')
 const addUser = () => {
-  if (newUser.value !== '') {
-    settingsUpdate.value?.users.push(Principal.fromText(newUser.value))
+  try {
+    if (newUser.value.trim() === '') {
+      throw new Error('User cannot be empty')
+    }
+    settingsUpdate.value?.users.push(Principal.fromText(newUser.value.trim()))
     newUser.value = ''
+  } catch (e: any) {
+    notificationStore.addNotification({
+      title: 'Error Adding User',
+      message: e.message,
+      status: 'error'
+    })
   }
 }
 

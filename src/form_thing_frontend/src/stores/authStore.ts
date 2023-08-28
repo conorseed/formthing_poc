@@ -5,6 +5,7 @@ import type { _SERVICE } from '@root/declarations/form_thing_backend/form_thing_
 import type { Principal } from '@dfinity/principal'
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
+import { useFormStore } from '@/stores/formStore'
 
 export const useAuthStore = defineStore('auth', () => {
   // The Internet Identity URL is the URL of the Internet Identity canister on your local network.
@@ -59,6 +60,9 @@ export const useAuthStore = defineStore('auth', () => {
     identity.value = null
     principal.value = null
     agent.value = null
+
+    // clear form store
+    useFormStore().clear()
   }
 
   const login_retry = async () => {
@@ -79,7 +83,7 @@ export const useAuthStore = defineStore('auth', () => {
       agent: agent.value
     })
 
-    return false
+    return true
   }
 
   // A function to check if the user is authenticated

@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory, START_LOCATION } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import { nextTick } from 'vue'
-import { useFormStore } from '@/stores/formStore'
+import { useNotificationStore } from '@/stores/useNotificationStore'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -68,7 +68,15 @@ router.beforeEach(async (to, from) => {
   const authStore = useAuthStore()
   // first try to login
   if (from === START_LOCATION) {
-    await authStore.login_retry()
+    const res = await authStore.login_retry()
+    if (res) {
+      // add notification
+      useNotificationStore().addNotification({
+        title: 'Welcome Back',
+        message: "You've been automatically logged in from a previous session.",
+        status: 'success'
+      })
+    }
   }
   // check if the route requires authentication
   if (to.matched.some((record) => record.meta.requiresAuth)) {
@@ -79,21 +87,6 @@ router.beforeEach(async (to, from) => {
     }
   }
 })
-
-// Change title meta for AdminFormSinglePage
-// router.beforeEach(async (to) => {
-//   if (to.name !== 'adminFormSingle') return
-
-//   // get the form id
-//   const formId = to.params.formId as string
-//   // get the form
-//   const form = await useFormStore().getFormById(formId)
-//   // set the title
-//   if (form) {
-//     to.meta.title = form.name
-//     return
-//   }
-// })
 
 // Focus the body on route change
 router.afterEach((from, to) => {
