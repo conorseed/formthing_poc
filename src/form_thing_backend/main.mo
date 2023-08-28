@@ -601,6 +601,11 @@ shared ({ caller = creator }) actor class FormThingActor() {
       case (?(key, found_form)) { found_form };
     };
 
+    // return early if form is not active
+    if (form.status != #active) {
+      return #err("Form is not active");
+    };
+
     // check nonce
     let nonce_check = Map.find<Text, FormThing.NonceCheck>(stable_nonces, func(k, v) { k == nonce });
 
