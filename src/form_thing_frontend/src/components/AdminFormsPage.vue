@@ -19,14 +19,7 @@
           <div class="min-w-0">
             <div class="flex items-start gap-x-3">
               <p class="text-base font-semibold leading-6 text-gray-900">{{ form.name }}</p>
-              <p
-                :class="[
-                  getStatusClasses(Object.keys(form.status)[0]),
-                  'mt-0.5 whitespace-nowrap rounded-md px-1.5 py-0.5 text-xs font-medium capitalize ring-1 ring-inset'
-                ]"
-              >
-                {{ Object.keys(form.status)[0] }}
-              </p>
+              <AdminFormStatus :status="form.status" />
               <div class="flex w-16 items-center gap-x-2.5">
                 <div>
                   <span class="sr-only">Total entries</span>
@@ -165,20 +158,6 @@ import { ref } from 'vue'
 const authStore = useAuthStore()
 const formStore = useFormStore()
 const { formatDate } = useGeneralUtils()
-
-const statuses = {
-  active: 'text-green-700 bg-green-50 ring-green-600/20',
-  inactive: 'text-gray-600 bg-gray-50 ring-gray-500/10'
-}
-
-const getStatusClasses = (status: string) => {
-  switch (status) {
-    case 'active':
-      return statuses.active
-    case 'inactive':
-      return statuses.inactive
-  }
-}
 
 // try to fetch forms
 const error = ref<string | null>(null)

@@ -13,6 +13,7 @@ declare module 'vue' {
     AdminFormSinglePageSettingsModal: (typeof import('./src/components/AdminFormSinglePageSettingsModal.vue'))['default']
     AdminFormSinglePageUpdateForm: (typeof import('./src/components/AdminFormSinglePageUpdateForm.vue'))['default']
     AdminFormsPage: typeof import('./src/components/AdminFormsPage.vue')['default']
+    AdminFormStatus: typeof import('./src/components/AdminFormStatus.vue')['default']
     AdminFormUpdateSettings: (typeof import('./src/components/AdminFormUpdateSettings.vue'))['default']
     AdminModalFormDelete: typeof import('./src/components/AdminModalFormDelete.vue')['default']
     AdminModalFormSettings: typeof import('./src/components/AdminModalFormSettings.vue')['default']

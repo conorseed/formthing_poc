@@ -71,7 +71,10 @@
         </div>
       </li>
     </ul>
-    <div v-if="!entries_loading && (!entries || !entries.length)" class="text-center">
+    <div
+      v-if="!entries_loading && (!entries || !entries.length) && !entries_error.status"
+      class="text-center"
+    >
       <PencilSquareIcon class="mx-auto h-12 w-12 text-gray-400" aria-hidden="true" />
       <h3 class="mt-2 text-sm font-semibold text-gray-900">No entries yet</h3>
       <p class="mt-1 text-sm text-gray-500">Share this form to get entries.</p>
@@ -86,6 +89,10 @@
           Copy Link
         </button>
       </div>
+    </div>
+    <div v-if="entries_error.status" class="text-center">
+      <h3 class="mt-2 text-sm font-semibold text-gray-900">Error fetching entries</h3>
+      <p class="mt-1 text-sm text-gray-500">{{ entries_error.message }}</p>
     </div>
   </section>
 </template>
@@ -113,15 +120,25 @@ const { formatDate, sanitizeHTML } = useGeneralUtils()
 const vetkdUtils = useVetkdUtils()
 
 // fetch keys
+const entries_error = ref({
+  status: false,
+  message: ''
+})
 onMounted(async () => {
   if (props.entries_total > 0) {
-    const keys = await vetkdUtils.fetch_vetkeys(props.form_id)
-    if (!keys) {
-      console.warn('fetch_vetkeys', 'no keys found')
+    try {
+      const keys = await vetkdUtils.fetch_vetkeys(props.form_id)
+      if (!keys) {
+        throw new Error('Could not fetch keys')
+      }
+      get_entries()
+    } catch (e: any) {
+      entries_error.value = {
+        status: true,
+        message: e.message
+      }
       entries_loading.value = false
-      return
     }
-    get_entries()
   } else {
     entries_loading.value = false
   }
@@ -147,7 +164,7 @@ const entries_loading = ref(true)
 async function get_entries() {
   entries_loading.value = true
   const res = await useAuthStore().actor?.get_entries(props.form_id)
-  console.log('get_entries', res)
+
   // return early if error
   if (!res || 'err' in res) {
     entries_loading.value = false

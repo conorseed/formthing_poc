@@ -3,14 +3,38 @@
     <div v-if="form" class="grid gap-10 lg:grid-cols-8">
       <div class="lg:col-span-2">
         <div class="mb-4 rounded-lg bg-white p-6 shadow">
-          <h2 class="mb-6 text-xl font-bold tracking-tight text-gray-900">{{ form.name }}</h2>
-          <p>ID: {{ form.id }}</p>
-          <p>Status: {{ form.status }}</p>
-          <p class="truncate">
-            Created by {{ form.owner.toString() }} on: {{ formatDate(form.created) }}
+          <div class="mb-2 flex justify-between gap-2">
+            <p class="text-sm text-gray-500">#{{ form.id }}</p>
+            <AdminFormStatus :status="form.status" />
+          </div>
+          <h2
+            class="mb-6 border-b border-solid border-gray-200 pb-3 text-xl font-bold tracking-tight text-gray-900"
+          >
+            {{ form.name }}
+          </h2>
+          <p class="mb-1 mt-2 text-sm font-bold text-gray-500">Owner</p>
+          <p :title="form.owner.toString()">
+            {{ form.owner.toString().substring(0, 3) }}...{{
+              form.owner.toString().substring(form.owner.toString().length - 3)
+            }}
           </p>
-          <p>Last Updated: {{ formatDate(form.updated) }}</p>
-          <p class="truncate">Users: {{ form.users }}</p>
+          <p class="mb-1 mt-2 text-sm font-bold text-gray-500">Last Updated</p>
+          <p>{{ formatDate(form.updated) }}</p>
+          <p class="mb-1 mt-2 text-sm font-bold text-gray-500">Created</p>
+          <p class="truncate">{{ formatDate(form.created) }}<br /></p>
+          <p class="mb-1 mt-2 text-sm font-bold text-gray-500">Users</p>
+          <div class="flex flex-wrap gap-2">
+            <span
+              v-for="user in form.users"
+              :key="user.toString()"
+              class="inline-flex items-center rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300"
+              :title="user.toString()"
+            >
+              {{ user.toString().substring(0, 3) }}...{{
+                user.toString().substring(user.toString().length - 3)
+              }}
+            </span>
+          </div>
         </div>
         <div class="flex flex-wrap gap-2">
           <button
