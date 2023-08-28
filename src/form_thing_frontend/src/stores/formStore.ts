@@ -5,7 +5,10 @@ import type {
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { useAuthStore } from './authStore'
+import { useGeneralUtils } from '@/composables/useGeneralUtils'
 import type { Principal } from '@dfinity/principal'
+
+const { sanitizeHTML } = useGeneralUtils()
 
 export const useFormStore = defineStore('form', () => {
   /*
@@ -87,7 +90,7 @@ export const useFormStore = defineStore('form', () => {
 
     const res = await authStore.actor.update_form_settings(
       form.id,
-      settings.name,
+      sanitizeHTML(settings.name),
       status,
       settings.users as Principal[]
     )
@@ -149,7 +152,7 @@ export const useFormStore = defineStore('form', () => {
       return
     }
     const res = await authStore.actor?.create_form(
-      newForm.name,
+      sanitizeHTML(newForm.name),
       { [newForm.status]: null } as FormStatus,
       newForm.users,
       ''

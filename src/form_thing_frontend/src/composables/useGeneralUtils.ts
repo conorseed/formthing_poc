@@ -7,5 +7,9 @@ export function useGeneralUtils() {
     }).format(date)
   }
 
-  return { formatDate }
+  const sanitizeHTML = (input: string): string => {
+    return input.replace(/<[^>]*>/g, '') // Removes all HTML tags
+  }
+
+  return { formatDate, sanitizeHTML }
 }

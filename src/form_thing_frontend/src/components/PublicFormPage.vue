@@ -110,6 +110,7 @@
 </template>
 
 <script setup lang="ts">
+import { useGeneralUtils } from '@/composables/useGeneralUtils'
 import { useVetkdUtils } from '@/composables/useVetkdUtils'
 import type { ResultFormReturnPublicWithNonce } from '@root/declarations/form_thing_backend/form_thing_backend.did'
 import { computed, ref } from 'vue'
@@ -117,6 +118,8 @@ import { useRoute } from 'vue-router'
 
 const route = useRoute()
 const vetkdUtils = useVetkdUtils()
+
+const { sanitizeHTML } = useGeneralUtils()
 
 // Fetch Form
 const form = ref<ResultFormReturnPublicWithNonce>()
@@ -160,6 +163,10 @@ const encrypt_and_send = async (e: Event) => {
     if (!formIsValid.value) {
       throw new Error('Please fill out all the fields correctly')
     }
+
+    // sanitize form data
+    form_data.value.name = sanitizeHTML(form_data.value.name.trim())
+    form_data.value.email = form_data.value.email.trim()
 
     // encrypt form data
     const encrypted_data = await vetkdUtils.aes_encrypt({

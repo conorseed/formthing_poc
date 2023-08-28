@@ -4,9 +4,20 @@
       class="mb-6 flex flex-wrap items-end justify-between gap-2 text-2xl font-bold tracking-tight text-gray-900"
     >
       Entries
-      <span class="text-sm tracking-normal text-gray-500"
-        >Total Entries: {{ props.entries_total }}</span
-      >
+      <div class="flex items-end gap-4">
+        <span class="text-sm tracking-normal text-gray-500"
+          >Total Entries: {{ props.entries_total }}</span
+        >
+        <button
+          v-if="props.entries_total > 0"
+          @click="exportEntries"
+          :disabled="!entries || !entries.length"
+          type="submit"
+          class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-30"
+        >
+          Export to CSV
+        </button>
+      </div>
     </h2>
     <ul
       v-if="!entries_loading && entries && entries.length"
@@ -20,7 +31,7 @@
       >
         <div class="flex justify-between gap-x-4 py-3 text-sm text-gray-500">
           <span>#{{ entry.id }}</span>
-          <span>Created: {{ formatDate(entry.created) }}</span>
+          <span>Created: {{ entry.created }}</span>
         </div>
         <div v-if="typeof entry.data === 'object'" class="pt-4">
           <div v-for="(value, key) in entry.data" :key="key">
@@ -98,7 +109,7 @@ const props = defineProps({
   }
 })
 
-const { formatDate } = useGeneralUtils()
+const { formatDate, sanitizeHTML } = useGeneralUtils()
 const vetkdUtils = useVetkdUtils()
 
 // fetch keys
@@ -119,7 +130,7 @@ onMounted(async () => {
 // get entries
 interface EntryDecrypted {
   id: number
-  created: bigint
+  created: string
   data: {
     [key: string]: any
   }
@@ -163,15 +174,82 @@ async function get_entries() {
           ...entry[1]
         }
       }
+      // parse and sanitize decrypted data
+      const data = JSON.parse(decrypted_data)
+      const sanitizedData: {
+        [key: string]: any
+      } = {}
+      Object.keys(data).forEach((key) => {
+        sanitizedData[sanitizeHTML(key)] = sanitizeHTML(data[key])
+      })
+
       return {
         id: Number(entry[0]),
         ...entry[1],
-        data: JSON.parse(decrypted_data)
+        created: formatDate(entry[1].created),
+        data: sanitizedData
       }
     })
   )
   entries.value = decrypted_entries
   entries_loading.value = false
+}
+
+// export entries to csv
+const exportEntries = async () => {
+  if (!entries.value) return
+  const csv = arrayToCSV(entries.value)
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.setAttribute('href', url)
+  link.setAttribute('download', `form_${props.form_id}_entries.csv`)
+  link.style.visibility = 'hidden'
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+}
+
+function arrayToCSV(dataArray: EntriesProcessed) {
+  // Return empty string if no data provided
+  if (!dataArray || dataArray.length === 0) {
+    return ''
+  }
+
+  // Extract headers from keys
+  const header = Object.keys(dataArray[0]) as (keyof EntryDecrypted | keyof EntryEncrypted)[]
+  // Process rows
+  const rows = dataArray.map((obj) =>
+    header.map((key) => {
+      let value = obj[key]
+
+      // Convert BigInt to string
+      if (typeof value === 'bigint' && key == 'created') {
+        value = formatDate(value)
+      }
+
+      // If value is an object, stringify it
+      if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+        const dataObj = value as Record<string, any>
+        // iterate over object and stringify each key/value pair
+        value = ''
+        Object.keys(dataObj).forEach((k) => {
+          value += `${k}: ${dataObj[k]}\n`
+        })
+      }
+
+      // If value is a string, add quotes
+      if (typeof value === 'string') {
+        value = `"${value.replace(/"/g, '"')}"`
+      }
+
+      return value
+    })
+  )
+
+  const csvContent = header.join(',') + '\n' + rows.map((row) => row.join(',')).join('\n') // Join data with commas and newlines
+
+  return csvContent
 }
 
 /**
