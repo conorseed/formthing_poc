@@ -49,7 +49,7 @@ const router = createRouter({
     },
     {
       path: '/forms/',
-      component: () => import('@/views/MainView.vue'),
+      component: () => import('@/views/PublicFormView.vue'),
       children: [
         {
           path: ':formId',

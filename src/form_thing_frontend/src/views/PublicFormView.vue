@@ -1,7 +1,10 @@
 <template>
-  <TheHeader />
-  <main class="mx-auto max-w-7xl p-6 lg:px-8">
-    <RouterView v-slot="{ Component }" :key="useRoute().fullPath">
+  <main class="flex min-h-screen items-center bg-indigo-950">
+    <RouterView
+      v-slot="{ Component }"
+      :key="route.fullPath"
+      class="mx-auto w-full max-w-2xl px-6 pb-24 pt-10 lg:px-8"
+    >
       <template v-if="Component">
         <Transition mode="out-in">
           <Suspense>
@@ -10,7 +13,9 @@
 
             <!-- loading state -->
             <template #fallback>
-              <div class="mx-auto max-w-7xl p-6 lg:px-8">
+              <div
+                class="mx-auto flex min-h-screen max-w-2xl items-center justify-center p-6 lg:px-8"
+              >
                 <div role="status">
                   <svg
                     aria-hidden="true"
@@ -37,8 +42,18 @@
       </template>
     </RouterView>
   </main>
+  <footer class="fixed bottom-0 right-0 p-4">
+    <RouterLink :to="{ name: 'home' }" target="_blank" class="-m-1.5 p-1.5 font-bold text-white">
+      <span class="text-xs font-light">Powered By </span>Form<span class="text-indigo-400"
+        >Thing</span
+      >
+    </RouterLink>
+  </footer>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { useRoute } from 'vue-router'
+const route = useRoute()
 </script>
+
+<style scoped></style>

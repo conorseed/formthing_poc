@@ -1,4 +1,5 @@
 <template>
+  <TheHeader />
   <PageHeader :title="route.meta.title" />
   <main class="min-h-screen bg-gray-100">
     <RouterView
