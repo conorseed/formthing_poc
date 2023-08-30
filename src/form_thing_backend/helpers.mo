@@ -136,5 +136,5 @@ module FormThingHelpers {
     }) -> async ({ encrypted_key : Blob });
   };
 
-  public let vetkd_api : VETKD_SYSTEM_API = actor ("s55qq-oqaaa-aaaaa-aaakq-cai");
+  public let vetkd_api : VETKD_SYSTEM_API = actor ("6y7r2-lqaaa-aaaan-qeaaa-cai");
 };

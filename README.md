@@ -107,7 +107,7 @@ dfx start --clean
 ```
 npm install
 mops install
-dfx canister create vetkd_system_api --specified-id s55qq-oqaaa-aaaaa-aaakq-cai
+dfx canister create vetkd_system_api --specified-id 6y7r2-lqaaa-aaaan-qeaaa-cai
 dfx generate
 dfx deploy
 ```

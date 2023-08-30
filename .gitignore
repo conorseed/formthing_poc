@@ -4,6 +4,7 @@ dist
 node_modules/
 src/declarations/
 .env
+canister_ids.json
 # Logs
 logs
 *.log
