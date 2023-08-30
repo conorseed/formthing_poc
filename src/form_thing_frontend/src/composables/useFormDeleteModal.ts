@@ -1,6 +1,6 @@
 import { useFormStore } from '@/stores/formStore'
 import { useNotificationStore } from '@/stores/useNotificationStore'
-import type { FormReturn } from '@root/declarations/form_thing_backend/form_thing_backend.did'
+import type { FormReturn } from '@root/declarations/form_thing_backend/form_thing_backend.did.d.ts'
 import { ref } from 'vue'
 
 const formStore = useFormStore()

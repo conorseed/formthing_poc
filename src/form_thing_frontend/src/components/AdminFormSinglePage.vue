@@ -115,7 +115,7 @@ import { useFormStore } from '@/stores/formStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useRoute, useRouter } from 'vue-router'
 import { useSeoMeta } from '@vueuse/head'
-import { type FormReturn } from '@root/declarations/form_thing_backend/form_thing_backend.did'
+import { type FormReturn } from '@root/declarations/form_thing_backend/form_thing_backend.did.d.ts'
 import { ref } from 'vue'
 import {
   DocumentDuplicateIcon,

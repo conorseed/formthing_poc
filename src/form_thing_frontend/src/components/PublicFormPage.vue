@@ -123,7 +123,7 @@
 import { useGeneralUtils } from '@/composables/useGeneralUtils'
 import { useVetkdUtils } from '@/composables/useVetkdUtils'
 import { useSeoMeta } from '@vueuse/head'
-import type { ResultFormReturnPublicWithNonce } from '@root/declarations/form_thing_backend/form_thing_backend.did'
+import type { ResultFormReturnPublicWithNonce } from '@root/declarations/form_thing_backend/form_thing_backend.did.d.ts'
 import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 

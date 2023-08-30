@@ -10,7 +10,7 @@
 </template>
 
 <script setup lang="ts">
-import type { FormStatus } from '@root/declarations/form_thing_backend/form_thing_backend.did'
+import type { FormStatus } from '@root/declarations/form_thing_backend/form_thing_backend.did.d.ts'
 
 defineProps<{
   status: FormStatus

@@ -9,9 +9,10 @@ import { useFormStore } from '@/stores/formStore'
 
 export const useAuthStore = defineStore('auth', () => {
   // The Internet Identity URL is the URL of the Internet Identity canister on your local network.
-  const internet_identity_url = `http://localhost:4943/?canisterId=${
-    import.meta.env.CANISTER_ID_INTERNET_IDENTITY
-  }`
+  const internet_identity_url =
+    import.meta.env.DFX_NETWORK == 'local'
+      ? `http://localhost:4943/?canisterId=${import.meta.env.CANISTER_ID_INTERNET_IDENTITY}`
+      : `https://identity.ic0.app`
 
   /*
    * Main store values

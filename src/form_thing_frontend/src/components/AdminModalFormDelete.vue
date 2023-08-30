@@ -75,7 +75,7 @@
 <script setup lang="ts">
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
 import { ExclamationTriangleIcon } from '@heroicons/vue/24/outline'
-import type { FormReturn } from '@root/declarations/form_thing_backend/form_thing_backend.did'
+import type { FormReturn } from '@root/declarations/form_thing_backend/form_thing_backend.did.d.ts'
 
 const props = defineProps<{
   open: boolean

@@ -1,7 +1,7 @@
 import type {
   FormReturn,
   FormStatus
-} from '@root/declarations/form_thing_backend/form_thing_backend.did'
+} from '@root/declarations/form_thing_backend/form_thing_backend.did.d.ts'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { useAuthStore } from './authStore'

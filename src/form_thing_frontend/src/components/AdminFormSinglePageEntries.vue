@@ -100,7 +100,7 @@
 <script setup lang="ts">
 import { useGeneralUtils } from '@/composables/useGeneralUtils'
 import { useVetkdUtils } from '@/composables/useVetkdUtils'
-import type { Entry } from '@root/declarations/form_thing_backend/form_thing_backend.did'
+import type { Entry } from '@root/declarations/form_thing_backend/form_thing_backend.did.d.ts'
 import { onMounted, ref } from 'vue'
 import { PencilSquareIcon, DocumentDuplicateIcon, CheckIcon } from '@heroicons/vue/24/outline'
 import { useAuthStore } from '@/stores/authStore'

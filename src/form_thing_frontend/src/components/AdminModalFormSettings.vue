@@ -154,7 +154,7 @@ import { useNotificationStore } from '@/stores/useNotificationStore'
 import { Principal } from '@dfinity/principal'
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
 import { Cog8ToothIcon, XMarkIcon } from '@heroicons/vue/24/outline'
-import type { FormReturn } from '@root/declarations/form_thing_backend/form_thing_backend.did'
+import type { FormReturn } from '@root/declarations/form_thing_backend/form_thing_backend.did.d.ts'
 import { computed, ref, toRaw } from 'vue'
 
 const props = defineProps<{
