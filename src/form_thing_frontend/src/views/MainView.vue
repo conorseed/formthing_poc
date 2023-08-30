@@ -38,6 +38,7 @@
     </RouterView>
   </main>
   <TheNotifications />
+  <TheFooter />
 </template>
 
 <script setup lang="ts">

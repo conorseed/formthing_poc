@@ -112,6 +112,7 @@ import { computed, ref } from 'vue'
 import { useFormStore } from '@/stores/formStore'
 import { useNotificationStore } from '@/stores/useNotificationStore'
 import router from '@/router'
+import { useSeoMeta } from '@vueuse/head'
 
 const formStore = useFormStore()
 const notificationStore = useNotificationStore()
@@ -190,6 +191,13 @@ const onSubmit = async () => {
 
   submitting.value = false
 }
+
+/*
+ * SEO
+ */
+useSeoMeta({
+  title: 'Create Form'
+})
 </script>
 
 <style scoped></style>

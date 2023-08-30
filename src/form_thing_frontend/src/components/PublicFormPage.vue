@@ -112,6 +112,7 @@
 <script setup lang="ts">
 import { useGeneralUtils } from '@/composables/useGeneralUtils'
 import { useVetkdUtils } from '@/composables/useVetkdUtils'
+import { useSeoMeta } from '@vueuse/head'
 import type { ResultFormReturnPublicWithNonce } from '@root/declarations/form_thing_backend/form_thing_backend.did'
 import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
@@ -123,6 +124,15 @@ const { sanitizeHTML } = useGeneralUtils()
 
 // Fetch Form
 const form = ref<ResultFormReturnPublicWithNonce>()
+
+/*
+ * SEO
+ */
+useSeoMeta({
+  title: () => (form.value && 'ok' in form.value ? `${form.value.ok.name}` : `Loading...`),
+  description: 'Another form built by FormThing.'
+})
+
 const form_res = await vetkdUtils.form_thing_backend.get_form_by_id_with_nonce(
   route.params.formId as string
 )

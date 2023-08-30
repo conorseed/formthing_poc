@@ -145,6 +145,7 @@
 <script setup lang="ts">
 import { useFormStore } from '@/stores/formStore'
 import { useAuthStore } from '@/stores/authStore'
+import { useSeoMeta } from '@vueuse/head'
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
 import { EllipsisVerticalIcon, ChatBubbleLeftIcon, PlusIcon } from '@heroicons/vue/20/solid'
 import { PencilSquareIcon, Cog8ToothIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/outline'
@@ -176,4 +177,11 @@ try {
 // Modal setup
 const updateFormSettingsModal = useUpdateFormSettingsModal()
 const formDeleteModal = useFormDeleteModal()
+
+/*
+ * SEO
+ */
+useSeoMeta({
+  title: 'All Forms'
+})
 </script>

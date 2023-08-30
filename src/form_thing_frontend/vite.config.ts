@@ -4,6 +4,7 @@ import EnvironmentPlugin from 'vite-plugin-environment'
 import wasm from 'vite-plugin-wasm'
 import vue from '@vitejs/plugin-vue'
 import Components from 'unplugin-vue-components/vite'
+import { ViteImageOptimizer } from 'vite-plugin-image-optimizer'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -14,7 +15,8 @@ export default defineConfig({
     EnvironmentPlugin('all', { prefix: 'DFX_', defineOn: 'import.meta.env' }),
     wasm(),
     vue(),
-    Components()
+    Components(),
+    ViteImageOptimizer({ includePublic: true })
   ],
   resolve: {
     alias: {

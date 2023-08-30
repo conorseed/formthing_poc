@@ -114,6 +114,7 @@ import { useGeneralUtils } from '@/composables/useGeneralUtils'
 import { useFormStore } from '@/stores/formStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useRoute, useRouter } from 'vue-router'
+import { useSeoMeta } from '@vueuse/head'
 import { type FormReturn } from '@root/declarations/form_thing_backend/form_thing_backend.did'
 import { ref } from 'vue'
 import {
@@ -133,6 +134,15 @@ const { formatDate } = useGeneralUtils()
 
 // setup form
 const form = ref<FormReturn | undefined>(undefined)
+
+/*
+ * SEO
+ */
+useSeoMeta({
+  title: () => (form.value ? `Edit Form (${form.value.name})` : `Edit Form`)
+})
+
+// fetch form
 const res = await formStore.getFormById(route.params.formId as string)
 form.value = res
 

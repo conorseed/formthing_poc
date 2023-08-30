@@ -43,9 +43,11 @@
     </RouterView>
   </main>
   <TheNotifications />
+  <TheFooter />
 </template>
 
 <script setup lang="ts">
+import TheFooter from '@/components/TheFooter.vue'
 import { useRoute } from 'vue-router'
 const route = useRoute()
 </script>
