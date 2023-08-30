@@ -22,13 +22,13 @@ shared ({ caller = creator }) actor class FormThingActor() {
    */
   let { thash; nhash; phash } = Map;
 
-  // FORMS INFORMATION
+  // FORMS
   // - Hashed by "Form ID"
   stable var stable_forms = Map.new<Text, FormThing.Form>(thash);
   // - Hashed by "User Principal", value is array of "Form ID"s
   stable var stable_forms_by_user = Map.new<Principal, [Text]>(phash);
 
-  // FORM ENTRIES
+  // ENTRIES
   // - Hashed by "Form ID"
   stable var stable_entries = Map.new<Text, FormThing.Entries>(thash);
 
@@ -36,17 +36,15 @@ shared ({ caller = creator }) actor class FormThingActor() {
   // - Hashed by "Nonce"
   stable var stable_nonces = Map.new<Text, FormThing.NonceCheck>(thash);
 
-  // ORGANISATIONS
-  // - Hashed by "Organisation ID"
-  // var stable_organisations = Map.new<Text, FormThing.Organisation>(thash);
-
   /**
    * Forms Functionality
    */
 
   stable var current_form_id : Nat = 0;
 
-  // - Create Form
+  /*============
+   * Create Form
+   *===========*/
   public shared ({ caller }) func create_form(name : Text, status : FormThing.FormStatus, users : [Principal], organisation_id : Text) : async FormThing.ResultFormReturn {
 
     // Auth - No anonymous calls
@@ -138,7 +136,9 @@ shared ({ caller = creator }) actor class FormThingActor() {
     return #ok(return_form);
   };
 
-  // - Get Form by ID
+  /*============
+   * Get Form by ID
+   *===========*/
   public shared ({ caller }) func get_form_by_id(form_id : Text) : async FormThing.ResultFormReturn {
 
     // Auth - No anonymous calls
@@ -203,7 +203,10 @@ shared ({ caller = creator }) actor class FormThingActor() {
 
   };
 
-  // - Get Form by ID with nonce
+  /*============
+   * Get Form by ID with Nonce
+   * (for public use)
+   *===========*/
   public func get_form_by_id_with_nonce(form_id : Text) : async FormThing.ResultFormReturnPublicWithNonce {
 
     // find form
@@ -256,7 +259,9 @@ shared ({ caller = creator }) actor class FormThingActor() {
 
   };
 
-  // - Get Forms by User Principal
+  /*============
+   * Get Form by Principal
+   *===========*/
   public shared ({ caller }) func get_forms_by_user_principal() : async FormThing.ResultFormReturnArray {
 
     // Auth - No anonymous calls
@@ -324,7 +329,9 @@ shared ({ caller = creator }) actor class FormThingActor() {
     return #ok(forms_return);
   };
 
-  // - Update Form Settings
+  /*============
+   * Update Form Settings
+   *===========*/
   let update_form_settings_lock = Map.new<Text, Bool>(thash);
   public shared ({ caller }) func update_form_settings(form_id : Text, name : Text, status : FormThing.FormStatus, users : [Principal]) : async FormThing.ResultText {
 
@@ -479,7 +486,9 @@ shared ({ caller = creator }) actor class FormThingActor() {
 
   };
 
-  // - Delete Form
+  /*============
+   * Delete Form
+   *===========*/
   public shared ({ caller }) func delete_form(form_id : Text) : async FormThing.ResultText {
 
     // Auth - No anonymous calls
@@ -553,55 +562,22 @@ shared ({ caller = creator }) actor class FormThingActor() {
    * Organisations Functionality
    */
 
-  // var current_organisation_id : Nat = 0;
-
-  // // - Create Organisation
-  // public shared ({ caller }) func create_organisation(name : Text) : async Text {
-
-  //   // Create Organisation ID
-  //   let short_caller_id = FormThing.sub_text(Principal.toText(caller), 0, 8);
-  //   let organisation_id = Text.concat(Nat.toText(current_organisation_id), short_caller_id);
-
-  //   // Get time now
-  //   let time_now = Time.now();
-
-  //   // Create users buffer and add caller as user
-  //   let users = Buffer.Buffer<Principal>(0);
-  //   users.add(caller);
-
-  //   // Create Organisation
-  //   let new_organisation : FormThing.Organisation = {
-  //     created = time_now;
-  //     updated = time_now;
-  //     id = organisation_id;
-  //     name = name;
-  //     users = users;
-  //   };
-
-  //   // add organisation to organisations
-  //   ignore Map.put(organisations, thash, organisation_id, new_organisation);
-
-  //   // increment current_organisation_id
-  //   current_organisation_id += 1;
-
-  //   // return id
-  //   return organisation_id;
-  // };
-
   // TO DO:
+  // - Create Organisation
   // - Get Organisation by ID
-  // - Get Organisation by Name
-  // - Get Organisations by User Principal
-  // - Add User Principal to Organisation
-  // - Remove User Principal from Organisation
-  // - Update Organisation Name
+  // - Get Organisation by Name?
+  // - Get Organisations by Principal
+  // - Update Organisation Settings
   // - Delete Organisation
 
   /**
    * Entries Functionality
    */
 
-  // - Create Entry
+  /*============
+   * Create Entry
+   * (for public use)
+   *===========*/
   public func create_entry(form_id : Text, data : Text, nonce : Text) : async FormThing.ResultText {
 
     // find form
@@ -730,7 +706,9 @@ shared ({ caller = creator }) actor class FormThingActor() {
     return #ok("Entry created");
   };
 
-  // - Get entries for form
+  /*============
+   * Get Entries by Form ID
+   *===========*/
   public shared ({ caller }) func get_entries(form_id : Text) : async FormThing.ResultEntriesReturn {
 
     // Auth - No anonymous calls
@@ -769,8 +747,11 @@ shared ({ caller = creator }) actor class FormThingActor() {
   /**
    * Nonces Functionality
    */
-  // set recurring timer to delete expired nonces every 2 hours
-  // nonces expire after 30 minutes
+
+  /*============
+   * Set recurring timer to delete expired nonces every 2 hours
+   * Nonces expire 30 minutes after creation
+   *===========*/
   ignore Timer.recurringTimer(
     #seconds(60 * 60 * 2),
     func() : async () {

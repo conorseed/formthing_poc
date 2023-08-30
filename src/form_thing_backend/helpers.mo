@@ -71,6 +71,10 @@ module FormThingHelpers {
 
   public type EntriesReturn = [(Nat, Entry)]; // array of entries
 
+  /*============
+   * Result Types
+   * Makes it easer for frontend to handle
+   *===========*/
   public type ResultText = Result.Result<Text, Text>;
   public type ResultFormReturn = Result.Result<FormReturn, Text>;
   public type ResultFormReturnArray = Result.Result<[FormReturn], Text>;
@@ -81,7 +85,9 @@ module FormThingHelpers {
    * HELPER FUNCTIONS
    */
 
-  // Returns a substring of the given text from the given start index to the given end index
+  /*============
+   * Returns a substring of the given text from the given start index to the given end index
+   *===========*/
   public func sub_text(value : Text, indexStart : Nat, indexEnd : Nat) : Text {
     if (indexStart == 0 and indexEnd >= value.size()) {
       return value;
@@ -105,7 +111,9 @@ module FormThingHelpers {
     result;
   };
 
-  // creates a unique nonce
+  /*============
+   * Creates a unique nonce
+   *===========*/
   public func create_nonce() : async Text {
     let g = Source.Source();
     return UUID.toText(await g.new());
