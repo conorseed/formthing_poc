@@ -3,11 +3,13 @@ import Array "mo:base/Array";
 import Blob "mo:base/Blob";
 import Bool "mo:base/Bool";
 import Buffer "mo:base/Buffer";
+import Debug "mo:base/Debug";
 import Nat "mo:base/Nat";
 import Principal "mo:base/Principal";
 import Result "mo:base/Result";
 import Text "mo:base/Text";
 import Time "mo:base/Time";
+import Timer "mo:base/Timer";
 import Map "mo:motoko-hash-map/Map";
 
 import FormThing "helpers";
@@ -763,6 +765,29 @@ shared ({ caller = creator }) actor class FormThingActor() {
       };
     };
   };
+
+  /**
+   * Nonces Functionality
+   */
+  // set recurring timer to delete expired nonces every 2 hours
+  // nonces expire after 30 minutes
+  ignore Timer.recurringTimer(
+    #seconds(60 * 60 * 2),
+    func() : async () {
+      // get time now
+      let time_now = Time.now();
+      // iterate over nonces
+      let nonces = Map.toArray<Text, FormThing.NonceCheck>(stable_nonces);
+      for (nonce in nonces.vals()) {
+        // get time difference
+        let time_diff = time_now - nonce.1.created;
+        // delete nonce if it has expired (older than 30 minutes)
+        if (time_diff > 1800000000000) {
+          Map.delete(stable_nonces, thash, nonce.0);
+        };
+      };
+    },
+  );
 
   /**
    * VETKD Functionality
