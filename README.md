@@ -36,6 +36,10 @@ FormThing was created for Web3 companies to "do forms" the Web3 way:
   - [x] Get Forms by User
   - [x] Update Form Settings
   - [x] Delete Form
+  - [x] Create Entry (for public use)
+  - [x] Get Entries
+  - [x] vetKD Get Public Key (for public use)
+  - [x] vetKD Get Decryption Key
 - [x] Proof of Concept: Basic Frontend
   - [x] Login with Internet Identity
   - [x] Create & Manage Forms
