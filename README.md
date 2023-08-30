@@ -1,6 +1,6 @@
 # FormThing: End to End Encrypted Form Builder on the Blockchain
 
-Create beautiful, fully accesible forms and control your own data using FormThing.
+Create beautiful, fully accessible forms and control your own data using FormThing.
 
 - [Frontend Demo here](https://6w54s-qaaaa-aaaan-qeaba-cai.icp0.io/)
 - [Backend API here](https://a4gq6-oaaaa-aaaab-qaa4q-cai.raw.icp0.io/?id=676xo-giaaa-aaaan-qeaaq-cai)
