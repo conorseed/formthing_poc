@@ -1,4 +1,4 @@
-# FormThing: End to End Encypted Form Builder on the Blockchain
+# FormThing: End to End Encrypted Form Builder on the Blockchain
 
 Create beautiful, fully accesible forms and control your own data using FormThing.
 
