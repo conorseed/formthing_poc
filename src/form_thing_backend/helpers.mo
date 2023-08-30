@@ -7,6 +7,8 @@ import Principal "mo:base/Principal";
 import Result "mo:base/Result";
 import Text "mo:base/Text";
 import Map "mo:motoko-hash-map/Map";
+import Source "mo:uuid.mo/async/SourceV4";
+import UUID "mo:uuid.mo/UUID";
 
 module FormThingHelpers {
 
@@ -50,6 +52,7 @@ module FormThingHelpers {
   public type NonceCheck = {
     form_id : Text; // id of the form the nonce belongs to
     lock : Bool; // lock
+    created : Int; // timestamp from Time.now() of when created
   };
 
   public type FormReturnPublicWithNonce = Nonce and {
@@ -103,10 +106,9 @@ module FormThingHelpers {
   };
 
   // creates a unique nonce
-  public func create_nonce() : Text {
-    // let g = Source.Source();
-    // return UUID.toText(await g.new());
-    return "Hello123";
+  public func create_nonce() : async Text {
+    let g = Source.Source();
+    return UUID.toText(await g.new());
   };
 
   /*

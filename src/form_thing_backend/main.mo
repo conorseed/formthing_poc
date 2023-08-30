@@ -218,11 +218,23 @@ shared ({ caller = creator }) actor class FormThingActor() {
       case (?(key, found_form)) {
 
         // create a nonce and save it
-        let nonce = FormThing.create_nonce();
+        var nonce = await FormThing.create_nonce();
 
+        // if nonce exists, create a new one
+        // very unlikely, but just in case
+        label n loop {
+          let nonce_exists = Map.has(stable_nonces, thash, nonce);
+          if (nonce_exists == false) {
+            break n;
+          };
+          nonce := await FormThing.create_nonce();
+        };
+
+        // create nonce_check
         let nonce_check : FormThing.NonceCheck = {
           form_id = found_form.id;
           lock = false;
+          created = Time.now();
         };
 
         // save nonce
@@ -625,10 +637,20 @@ shared ({ caller = creator }) actor class FormThingActor() {
           return #err("Nonce is already in use");
         };
 
+        // return early if nonce is older than 30 minutes (nanoseconds)
+        let time_now = Time.now();
+        let time_diff = time_now - nonce_check.created;
+        if (time_diff > 1800000000000) {
+          // delete nonce as it has expired
+          Map.delete(stable_nonces, thash, nonce);
+          return #err("Nonce has expired");
+        };
+
         // lock nonce to ensure it can only be used once
         let new_nonce_check : FormThing.NonceCheck = {
           form_id = nonce_check.form_id;
           lock = true;
+          created = nonce_check.created;
         };
         ignore Map.put(stable_nonces, thash, nonce, new_nonce_check);
       };
