@@ -174,41 +174,44 @@ async function get_entries() {
   // decrypt entries
   const decrypted_entries = await Promise.all(
     res.ok.map(async (entry) => {
-      // return early if form is not ready
-      if (vetkdUtils.key_derived.value == null) {
-        return {
-          id: Number(entry[0]),
-          ...entry[1]
-        }
-      }
-      const decrypted_data = await vetkdUtils.aes_decrypt({
-        ciphertext_hex: entry[1].data,
-        rawKey: vetkdUtils.key_derived.value
-      })
-      if (!decrypted_data) {
-        return {
-          id: Number(entry[0]),
-          ...entry[1]
-        }
-      }
-      // parse and sanitize decrypted data
-      const data = JSON.parse(decrypted_data)
-      const sanitizedData: {
-        [key: string]: any
-      } = {}
-      Object.keys(data).forEach((key) => {
-        sanitizedData[sanitizeHTML(key)] = sanitizeHTML(data[key])
-      })
+      try {
+        // return early if form is not ready
+        if (vetkdUtils.key_derived.value == null) throw new Error('Form is not ready')
 
-      return {
-        id: Number(entry[0]),
-        ...entry[1],
-        created: formatDate(entry[1].created),
-        data: sanitizedData
+        // decrypt data
+        const decrypted_data = await vetkdUtils.aes_decrypt({
+          ciphertext_hex: entry[1].data,
+          rawKey: vetkdUtils.key_derived.value
+        })
+
+        // return early if decryption failed
+        if (!decrypted_data) throw new Error('Failed to decrypt entry')
+
+        // parse and sanitize decrypted data
+        const data = JSON.parse(decrypted_data)
+        const sanitizedData: {
+          [key: string]: any
+        } = {}
+        Object.keys(data).forEach((key) => {
+          sanitizedData[sanitizeHTML(key)] = sanitizeHTML(data[key])
+        })
+
+        return {
+          id: Number(entry[0]),
+          ...entry[1],
+          created: formatDate(entry[1].created),
+          data: sanitizedData
+        }
+      } catch (error) {
+        return {
+          id: Number(entry[0]),
+          ...entry[1],
+          created: formatDate(entry[1].created)
+        }
       }
     })
   )
-  entries.value = decrypted_entries
+  entries.value = decrypted_entries as EntriesProcessed
   entries_loading.value = false
 }
 

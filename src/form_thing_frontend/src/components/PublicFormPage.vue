@@ -99,12 +99,22 @@
       </template>
     </div>
     <div class="w-full" v-if="form && 'err' in form">
-      <h1 class="mb-8 mt-2 text-3xl font-bold tracking-tight text-white sm:text-4xl">
-        Form Not Found
-      </h1>
-      <p class="text-md text-gray-400">
-        The form you are looking for does not exist. Please check the URL and try again.
-      </p>
+      <template v-if="form.err == 'Form not found'">
+        <h1 class="mb-8 mt-2 text-3xl font-bold tracking-tight text-white sm:text-4xl">
+          Form Not Found
+        </h1>
+        <p class="text-md text-gray-400">
+          The form you are looking for does not exist. Please check the URL and try again.
+        </p>
+      </template>
+      <template v-else>
+        <h1 class="mb-8 mt-2 text-3xl font-bold tracking-tight text-white sm:text-4xl">
+          Oh no! Something Went Wrong.
+        </h1>
+        <p class="text-md text-gray-400">
+          {{ form.err }}
+        </p>
+      </template>
     </div>
   </div>
 </template>
@@ -133,14 +143,24 @@ useSeoMeta({
   description: 'Another form built by FormThing.'
 })
 
-const form_res = await vetkdUtils.form_thing_backend.get_form_by_id_with_nonce(
-  route.params.formId as string
-)
-form.value = form_res
+try {
+  const form_res = await vetkdUtils.form_thing_backend.get_form_by_id_with_nonce(
+    route.params.formId as string
+  )
+  form.value = form_res
+} catch (e: any) {
+  form.value = {
+    err: e.message
+  }
+}
 
 // if form exists, get the public key quietly
 if ('ok' in form.value) {
-  vetkdUtils.fetch_vetkey_public()
+  try {
+    vetkdUtils.fetch_vetkey_public()
+  } catch (e: any) {
+    console.warn(e)
+  }
 }
 
 // setup form data

@@ -12,22 +12,19 @@ export function useVetkdUtils() {
     // fetch and set the public key
     const key_public_promise = await fetch_vetkey_public()
     if (!key_public_promise) {
-      console.warn('Could not fetch public key')
-      return null
+      throw new Error('Could not fetch public key')
     }
 
     // get derivation id
     const derivation_id = string_to_bytes(form_id)
     if (!derivation_id) {
-      console.warn('Could not decode derivation id')
-      return null
+      throw new Error('Could not decode derivation id')
     }
 
     // fetch and set the derived key
     const key_derived_promise = await fetch_vetkey_by_derivation_id(derivation_id)
     if (!key_derived_promise) {
-      console.warn('Could not fetch derived key')
-      return null
+      throw new Error('Could not fetch derived key')
     }
 
     return { key_public, key_derived }
@@ -53,14 +50,14 @@ export function useVetkdUtils() {
       tsk.public_key()
     )
     // return early if no public key
-    if (key_public.value == null) return
+    if (key_public.value == null) throw new Error('No public key')
 
     // return early if no encrypted key
-    if (!ek_bytes_hex || 'err' in ek_bytes_hex) return
+    if (!ek_bytes_hex || 'err' in ek_bytes_hex) throw new Error('No encrypted key')
 
     // encrypted_key_bytes
     const ek_bytes = hex_decode(ek_bytes_hex.ok)
-    if (!ek_bytes) return
+    if (!ek_bytes) throw new Error('Could not decode encrypted key')
 
     // verify the key
     const k_bytes = tsk.decrypt(ek_bytes, key_public.value, derivation_id)
@@ -89,38 +86,28 @@ export function useVetkdUtils() {
     return new TextEncoder().encode(str)
   }
 
-  const aes_encrypt = ({
-    message,
-    rawKey,
-    form_id
-  }: {
-    message: string
-    rawKey: Uint8Array
-    form_id: string
-  }) => {
+  const aes_encrypt = (
+    { message, rawKey, form_id }: { message: string; rawKey: Uint8Array; form_id: string }
+  ) => {
     const message_encoded = new TextEncoder().encode(message)
     const seed = window.crypto.getRandomValues(new Uint8Array(32))
 
     // return early if form is not ready
-    if (!form_id) return
+    if (!form_id) throw new Error('Form is not ready')
 
     const derivation_id = string_to_bytes(form_id)
-    if (!derivation_id) return
+    if (!derivation_id) throw new Error('Could not encode derivation id')
 
     const ciphertext = vetkd.IBECiphertext.encrypt(rawKey, derivation_id, message_encoded, seed)
     return hex_encode(ciphertext.serialize())
   }
 
   // Decrypt a string with AES-GCM
-  const aes_decrypt = async ({
-    ciphertext_hex,
-    rawKey
-  }: {
-    ciphertext_hex: string
-    rawKey: Uint8Array
-  }) => {
+  const aes_decrypt = async (
+    { ciphertext_hex, rawKey }: { ciphertext_hex: string; rawKey: Uint8Array }
+  ) => {
     const bytes = hex_decode(ciphertext_hex)
-    if (!bytes) return
+    if (!bytes) throw new Error('Could not decode ciphertext')
     const ibe_ciphertext = vetkd.IBECiphertext.deserialize(bytes)
     const ibe_plaintext = ibe_ciphertext.decrypt(rawKey)
     return new TextDecoder().decode(ibe_plaintext)
