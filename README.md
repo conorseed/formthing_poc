@@ -9,7 +9,7 @@ Create beautiful, fully accessible forms and control your own data using FormThi
 
 ## ⛔️ Before you get too excited...
 
-This currently uses an [**insecure** implementation](../../rust/vetkd/src/system_api) of [the proposed vetKD system API on the IC](https://github.com/dfinity/interface-spec/pull/158) in a pre-compiled form. **Do not use this in production or for sensitive data**! This is solely provided **for demonstration purposes only**.
+This is only a Proof of Concept and currently uses an [**insecure** implementation](../../rust/vetkd/src/system_api) of [the proposed vetKD system API on the IC](https://github.com/dfinity/interface-spec/pull/158) in a pre-compiled form. **Do not use this in production or for sensitive data**! This is solely provided **for demonstration purposes only**.
 
 ## 👋 Introduction
 
