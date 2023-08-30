@@ -2,6 +2,7 @@
 
 Create beautiful, fully accessible forms and control your own data using FormThing.
 
+- [Video walkthrough here](https://vimeo.com/859550637/7d0b647223)
 - [Frontend Demo here](https://6w54s-qaaaa-aaaan-qeaba-cai.icp0.io/)
 - [Backend API here](https://a4gq6-oaaaa-aaaab-qaa4q-cai.raw.icp0.io/?id=676xo-giaaa-aaaan-qeaaq-cai)
 
