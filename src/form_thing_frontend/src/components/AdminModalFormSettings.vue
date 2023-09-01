@@ -240,11 +240,16 @@ const emitUpdateSettings = () => {
 // reset settings update
 const resetSettingsUpdate = () => {
   if (!props.form) return
+  console.log('resetting settings update')
   let status = Object.keys(props.form.status)[0]
+  let users: Principal[] = []
+  for (const user of props.form.users) {
+    users.push(Principal.fromText(user.toString()))
+  }
   settingsUpdate.value = {
-    name: toRaw(props.form.name),
+    name: JSON.parse(JSON.stringify(props.form.name)),
     status: status === 'active' ? 'active' : 'inactive',
-    users: toRaw(props.form.users)
+    users
   }
 }
 </script>
