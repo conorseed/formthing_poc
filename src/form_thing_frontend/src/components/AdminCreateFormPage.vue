@@ -113,6 +113,7 @@ import { useFormStore } from '@/stores/formStore'
 import { useNotificationStore } from '@/stores/useNotificationStore'
 import router from '@/router'
 import { useSeoMeta } from '@vueuse/head'
+import { useAuthStore } from '@/stores/authStore'
 
 const formStore = useFormStore()
 const notificationStore = useNotificationStore()
@@ -139,10 +140,20 @@ const canSubmit = computed(() => {
 const newUser = ref('')
 const addUser = () => {
   try {
-    if (newUser.value.trim() === '') {
+    newUser.value = newUser.value.trim()
+    if (newUser.value === '') {
       throw new Error('User cannot be empty')
     }
-    newForm.value?.users.push(Principal.fromText(newUser.value.trim()))
+    // check if user is principal trying to create form
+    if (newUser.value === useAuthStore().principal?.toString()) {
+      throw new Error('Cannot add owner to user list')
+    }
+    // check if user is already in list
+    const exists = newForm.value.users.find((u) => u.toString() === newUser.value)
+    if (exists) {
+      throw new Error('Principal already added as user')
+    }
+    newForm.value.users.push(Principal.fromText(newUser.value))
     newUser.value = ''
   } catch (e: any) {
     notificationStore.addNotification({

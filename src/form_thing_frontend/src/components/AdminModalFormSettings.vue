@@ -155,7 +155,7 @@ import { Principal } from '@dfinity/principal'
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
 import { Cog8ToothIcon, XMarkIcon } from '@heroicons/vue/24/outline'
 import type { FormReturn } from '@root/declarations/form_thing_backend/form_thing_backend.did.d.ts'
-import { computed, ref, toRaw } from 'vue'
+import { computed, ref } from 'vue'
 
 const props = defineProps<{
   open: boolean
@@ -206,10 +206,20 @@ const settingsUpdated = computed(() => {
 const newUser = ref('')
 const addUser = () => {
   try {
-    if (newUser.value.trim() === '') {
+    newUser.value = newUser.value.trim()
+    if (newUser.value === '') {
       throw new Error('User cannot be empty')
     }
-    settingsUpdate.value?.users.push(Principal.fromText(newUser.value.trim()))
+    // check if user is owner
+    if (newUser.value === props.form?.owner.toString()) {
+      throw new Error('Cannot add owner to user list')
+    }
+    // check if user is already in list
+    const exists = settingsUpdate.value?.users.find((u) => u.toString() === newUser.value)
+    if (exists) {
+      throw new Error('Principal already added as user')
+    }
+    settingsUpdate.value?.users.push(Principal.fromText(newUser.value))
     newUser.value = ''
   } catch (e: any) {
     notificationStore.addNotification({
