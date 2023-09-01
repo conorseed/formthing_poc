@@ -240,7 +240,6 @@ const emitUpdateSettings = () => {
 // reset settings update
 const resetSettingsUpdate = () => {
   if (!props.form) return
-  console.log('resetting settings update')
   let status = Object.keys(props.form.status)[0]
   let users: Principal[] = []
   for (const user of props.form.users) {
