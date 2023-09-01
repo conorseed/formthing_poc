@@ -87,7 +87,7 @@
       <AdminFormSinglePageEntries
         :form_id="form.id"
         :entries_total="Number(form.entries_total)"
-        class="lg:col-span-6"
+        class="col-span-full lg:col-span-6"
       />
     </div>
     <div v-else class="text-center">

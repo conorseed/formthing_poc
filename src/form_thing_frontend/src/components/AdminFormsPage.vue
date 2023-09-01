@@ -17,7 +17,7 @@
           class="flex items-center justify-between gap-x-6 py-5"
         >
           <div class="min-w-0">
-            <div class="flex items-start gap-x-3">
+            <div class="flex flex-wrap items-start gap-x-3 md:flex-nowrap">
               <p class="text-base font-semibold leading-6 text-gray-900">{{ form.name }}</p>
               <AdminFormStatus :status="form.status" />
               <div class="flex w-16 items-center gap-x-2.5">
@@ -48,13 +48,13 @@
               </p>
             </div>
           </div>
-          <div class="flex flex-none items-center gap-x-4">
+          <div class="flex flex-none items-center gap-x-0 md:gap-x-4">
             <Menu
               v-if="form.owner.toString() == authStore.principal?.toString()"
               as="div"
               class="relative flex-none"
             >
-              <MenuButton class="-m-2.5 block p-2.5 text-gray-500 hover:text-gray-900">
+              <MenuButton class="-m-2.5 block p-2.5 text-gray-500 hover:text-gray-900 sm:p-1">
                 <span class="sr-only">Open options</span>
                 <EllipsisVerticalIcon class="h-5 w-5" aria-hidden="true" />
               </MenuButton>
@@ -100,8 +100,14 @@
             </Menu>
             <RouterLink
               :to="`/admin/form/${form.id}`"
-              class="hidden rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:block"
+              class="hidden rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 md:block"
               >View form<span class="sr-only">, {{ form.name }}</span></RouterLink
+            >
+            <RouterLink
+              :to="`/admin/form/${form.id}`"
+              class="block rounded-md p-1 text-sm font-semibold text-gray-900 md:hidden"
+              ><ChevronRightIcon class="h-5 w-5" />
+              <span class="sr-only">View form ID:{{ form.name }}</span></RouterLink
             >
           </div>
         </li>
@@ -148,7 +154,12 @@ import { useAuthStore } from '@/stores/authStore'
 import { useSeoMeta } from '@vueuse/head'
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
 import { EllipsisVerticalIcon, ChatBubbleLeftIcon, PlusIcon } from '@heroicons/vue/20/solid'
-import { PencilSquareIcon, Cog8ToothIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/outline'
+import {
+  PencilSquareIcon,
+  Cog8ToothIcon,
+  ExclamationTriangleIcon,
+  ChevronRightIcon
+} from '@heroicons/vue/24/outline'
 import { useGeneralUtils } from '@/composables/useGeneralUtils'
 import { RouterLink } from 'vue-router'
 import type { FormReturn } from '@root/declarations/form_thing_backend/form_thing_backend.did.d.ts'

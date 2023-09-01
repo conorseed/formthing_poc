@@ -1,10 +1,10 @@
 <template>
   <section>
     <h2
-      class="mb-6 flex flex-wrap items-end justify-between gap-2 text-2xl font-bold tracking-tight text-gray-900"
+      class="mb-6 flex flex-wrap items-end justify-between gap-4 text-2xl font-bold tracking-tight text-gray-900 md:gap-2"
     >
       Entries
-      <div class="flex items-end gap-4">
+      <div class="flex flex-wrap items-end gap-4">
         <span class="text-sm tracking-normal text-gray-500"
           >Total Entries: {{ props.entries_total }}</span
         >
@@ -92,7 +92,9 @@
     </div>
     <div v-if="entries_error.status" class="text-center">
       <h3 class="mt-2 text-sm font-semibold text-gray-900">Error fetching entries</h3>
-      <p class="mt-1 text-sm text-gray-500">{{ entries_error.message }}</p>
+      <p class="mt-1 break-all text-sm text-gray-500 md:break-normal">
+        {{ entries_error.message }}
+      </p>
     </div>
   </section>
 </template>
