@@ -63,9 +63,10 @@ FormThing was created for Web3 companies to "do forms" the Web3 way:
   - [ ] Submission Notifications (via email?)
 - [ ] Refined Form Permissions
 - [ ] Organisations
-- [ ] Login without needing Web3 knowhow
+- [ ] Login without needing Web3 "knowhow"
 - [ ] Embeddable Forms
 - [ ] Form Analytics
+- [ ] Internationalisation
 - [ ] Paid Services
 
 ## 👀 How does it work?
