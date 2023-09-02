@@ -80,20 +80,26 @@ In a nutshell, it's the magic of [the proposed vetKD system API on the IC](https
 
 ![Form Submitter Diagrams](/readme/formthing-notesv2-submitter.jpg 'Form Submitter Diagrams')
 
-## 📝 Build Your Own Form
+## 📝 Build Your Own Form (using the Backend API)
 
 Right now, the demo only outputs a single form:
 
 ![Form Example](/readme/formthing-form-example.png 'Form Example')
 
-You could, however, build your own form using whatever tech stack you desire. To do so, all you need to do is:
+You could, however, build your own form using the Backend API and whatever tech stack you desire. To do so, all you need to do is:
 
-1. Create a Form and note the Form ID
-2. Make a call to the backend canister function `get_form_by_id_with_nonce` to get current form settings, and a security nonce used to verify the submission
-3. Make a call to the backend canister function `vetkd_get_public_key` to get the Derived IBE Public Key
-4. On form submission, encrypt the form data and send it to the backend canister function `create_entry`, along with the Form ID and nonce
+1. Create a Form using `create_form`, making sure the status is set to `active`, and note the Form ID
+2. Build out your form as desired
+3. On the page where your form is, make sure to call `get_form_by_id_with_nonce` using the Form ID from step 1 to get current form settings and a security nonce used to verify the submission
+4. On the same page, before submission, also make a call to `vetkd_get_public_key` to get the Derived IBE Public Key
+5. On form submission:
 
-An example form can be [found here](https://github.com/conorseed/formthing_poc/blob/main/src/form_thing_frontend/src/components/PublicFormPage.vue).
+- Encrypt the form data using the Public Key and Form ID
+- Send it to the backend using `create_entry`, along with the Form ID and nonce.
+
+An example of form creation can be [found here](https://github.com/conorseed/formthing_poc/blob/main/src/form_thing_frontend/src/stores/formStore.ts#L128-L157).
+
+An example of form submission can be [found here](https://github.com/conorseed/formthing_poc/blob/main/src/form_thing_frontend/src/components/PublicFormPage.vue#L146-L233). It uses the `ic-vetkd-utils-0.1.0` package as found at the root of this repo to handle the encryption in step 4.
 
 ## 👩‍💻 Deploy Locally
 
